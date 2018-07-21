@@ -45,12 +45,12 @@ void setup() {
     Serial.begin(9600);
 
     // disable carloop's high speed CAN since we're using the same pins
-    disableCarloop();
     enableBattery();
     slcan.openCAN();
 }
 
 void loop() {
+    disableCarloop();
     battery = readBattery();
     // Serial.println(battery);
     receiveMessages();

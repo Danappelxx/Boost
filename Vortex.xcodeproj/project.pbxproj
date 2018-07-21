@@ -2295,7 +2295,7 @@
 		37B07B942102C61C0077108D /* SLCAN.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SLCAN.h; sourceTree = "<group>"; };
 		37B07B952102C61C0077108D /* SLCAN.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SLCAN.cpp; sourceTree = "<group>"; };
 		37B07B962102C61C0077108D /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		37B07BA62102D5090077108D /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
+		37B07BA62102D5090077108D /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = vortex; path = /Users/dan/Developer/projects/Vortex/build/Debug/vortex; sourceTree = "<absolute>"; };
 		37B07BB32102D5D10077108D /* Release_Notes.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = Release_Notes.html; sourceTree = "<group>"; };
 		37B07BB52102D5D10077108D /* logo.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = logo.bmp; sourceTree = "<group>"; };
 		37B07BB62102D5D10077108D /* Clock configuration tool for STM32F2xx microcontrollers.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Clock configuration tool for STM32F2xx microcontrollers.pdf"; sourceTree = "<group>"; };
@@ -10214,7 +10214,6 @@
 				37B07BAF2102D5D10077108D /* particle-firmware */,
 				37B07B7F2102C6130077108D /* lib */,
 				37B07B932102C61C0077108D /* src */,
-				37B07BA62102D5090077108D /* vortex */,
 			);
 			sourceTree = "<group>";
 		};
