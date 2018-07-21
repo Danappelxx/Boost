@@ -5,7 +5,7 @@ Expose 2011 SAAB 9-3 CAN interfaces over Bluetooth Low Energy.
 
 ### Typical build
 
-```
+```shell
 particle compile duo --saveTo firmware.bin
 particle flash <device> firmware.bin
 ```
@@ -15,13 +15,15 @@ particle flash <device> firmware.bin
 Compiling with particle requires internet, as it actually compiles over the air. To do it locally and offline is a bunch of work. Important commands:
 
 #### Download firmware
-```
+
+```shell
 git clone https://github.com/particle-iot/firmware.git --branch feature/new-platform-duo /usr/local/
 mv /usr/local/firmare /usr/local/particle-firmware
 ```
 
 #### Install GCC ARM Embedded and dfu-util
-```
+
+```shell
 brew tap PX4/homebrew-px4
 brew update
 echo -e "
@@ -39,10 +41,22 @@ class GccArmNoneEabi53 < Formula
   end
 end" > /usr/local/Homebrew/Library/Taps/px4/homebrew-px4/gcc-arm-none-eabi-53.rb
 brew install px4/px4/gcc-arm-none-eabi-53 dfu-util
+```
 
 #### Download library locally
-```
+
+```shell
 particle library copy carloop
 ```
 
-Proceed to build in Xcode!
+#### Command Line
+In any directory, run:
+
+```shell
+make --directory=/usr/local/particle-firmware/modules all PLATFORM=duo APPDIR=$PROJECT_DIR
+```
+
+Firmware outputs in `$PROJECT_DIR/target/Vortex.bin`.
+
+#### Xcode
+Build the `firmware` target in Xcode, firmware outputs in `$PROJECT_DIR/target/Vortex.bin`!
