@@ -17,8 +17,7 @@ Compiling with particle requires internet, as it actually compiles over the air.
 #### Download firmware
 
 ```shell
-git clone https://github.com/particle-iot/firmware.git --branch feature/new-platform-duo /usr/local/
-mv /usr/local/firmare /usr/local/particle-firmware
+git clone https://github.com/particle-iot/firmware.git --branch feature/new-platform-duo /usr/local/particle-firmware
 ```
 
 #### Install GCC ARM Embedded and dfu-util
@@ -37,7 +36,7 @@ class GccArmNoneEabi53 < Formula
 
   def install
     ohai 'Copying binaries...'
-    system 'cp', '-rv', 'arm-none-eabi', 'bin', 'lib', 'share', "#{prefix}/"
+    system 'cp', '-rv', 'arm-none-eabi', 'bin', 'lib', 'share', '#{prefix}/'
   end
 end" > /usr/local/Homebrew/Library/Taps/px4/homebrew-px4/gcc-arm-none-eabi-53.rb
 brew install px4/px4/gcc-arm-none-eabi-53 dfu-util
