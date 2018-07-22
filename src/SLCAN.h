@@ -1,3 +1,5 @@
+#pragma once
+
 #include "application.h"
 
 class SLCAN {

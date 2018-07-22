@@ -69,7 +69,6 @@ void SLCAN::openCAN() {
         return;
 
     can.begin(33333);
-    // can.begin(500000);
 }
 
 void SLCAN::closeCAN() {

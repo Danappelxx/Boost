@@ -2,11 +2,14 @@
  * Exposes vehicle CAN interfaces over Bluetooth Low Energy
  */
 
+#define PLATFORM_ID 88
+
 #include "application.h"
 #include "carloop.h"
 #include "SLCAN.h"
 
 SYSTEM_THREAD(ENABLED);
+BLE_SETUP(DISABLED);
 
 CANChannel can(CAN_D1_D2);
 SLCAN slcan(can);
@@ -15,8 +18,7 @@ float battery;
 void disableCarloop() {
     // https://github.com/carloop/carloop-library/blob/186acf9403c375e9e251769fb4669c9a4d226704/src/carloop.cpp#L82
     pinMode(CarloopRevision2::CAN_ENABLE_PIN, OUTPUT);
-    // (HIGH = Normal mode, LOW = Standby mode)
-    digitalWrite(CarloopRevision2::CAN_ENABLE_PIN, LOW);
+    digitalWrite(CarloopRevision2::CAN_ENABLE_PIN, CarloopRevision2::CAN_ENABLE_INACTIVE);
 }
 
 void enableBattery() {
@@ -44,14 +46,12 @@ void serialEvent() {
 void setup() {
     Serial.begin(9600);
 
-    // disable carloop's high speed CAN since we're using the same pins
+    // disable carloop's high speed CAN to conserve power since we're not using it
+    disableCarloop();
     enableBattery();
-    slcan.openCAN();
 }
 
 void loop() {
-    disableCarloop();
     battery = readBattery();
-    // Serial.println(battery);
     receiveMessages();
 }
