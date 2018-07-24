@@ -7,13 +7,34 @@
 #include "application.h"
 #include "carloop.h"
 #include "SLCAN.h"
+#include "VortexManager.h"
+#include <vector>
 
 SYSTEM_THREAD(ENABLED);
 BLE_SETUP(DISABLED);
 
+BLE::Manager* makeManager();
+void disableCarloop();
+void enableBattery();
+float readBattery();
+void receiveMessages();
+
 CANChannel can(CAN_D1_D2);
 SLCAN slcan(can);
 float battery;
+
+void setup() {
+    Serial.begin(9600);
+
+    // disable carloop's high speed CAN to conserve power since we're not using it
+    disableCarloop();
+    enableBattery();
+}
+
+void loop() {
+    battery = readBattery();
+    receiveMessages();
+}
 
 void disableCarloop() {
     // https://github.com/carloop/carloop-library/blob/186acf9403c375e9e251769fb4669c9a4d226704/src/carloop.cpp#L82
@@ -41,17 +62,4 @@ void receiveMessages() {
 
 void serialEvent() {
     slcan.parseInput(Serial.read());
-}
-
-void setup() {
-    Serial.begin(9600);
-
-    // disable carloop's high speed CAN to conserve power since we're not using it
-    disableCarloop();
-    enableBattery();
-}
-
-void loop() {
-    battery = readBattery();
-    receiveMessages();
 }
