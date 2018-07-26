@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		370C775B2106F61600D078CF /* BLE.h in Sources */ = {isa = PBXBuildFile; fileRef = 37FBC6C92103EDBA006DC19C /* BLE.h */; };
-		370C775E21070F3E00D078CF /* VortexManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370C775C21070F3E00D078CF /* VortexManager.cpp */; };
+		370C775E21070F3E00D078CF /* VortexBluetooth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370C775C21070F3E00D078CF /* VortexBluetooth.cpp */; };
 		37B07BAD2102D55B0077108D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B962102C61C0077108D /* main.cpp */; };
 		37B07BAE2102D55F0077108D /* SLCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B952102C61C0077108D /* SLCAN.cpp */; };
 		37B09E102102D5D90077108D /* mbedtls_communication.inc in Sources */ = {isa = PBXBuildFile; fileRef = 37B07BC02102D5D10077108D /* mbedtls_communication.inc */; };
@@ -2284,8 +2284,8 @@
 
 /* Begin PBXFileReference section */
 		370C775A2106E62100D078CF /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
-		370C775C21070F3E00D078CF /* VortexManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VortexManager.cpp; sourceTree = "<group>"; };
-		370C775D21070F3E00D078CF /* VortexManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VortexManager.h; sourceTree = "<group>"; };
+		370C775C21070F3E00D078CF /* VortexBluetooth.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VortexBluetooth.cpp; sourceTree = "<group>"; };
+		370C775D21070F3E00D078CF /* VortexBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VortexBluetooth.h; sourceTree = "<group>"; };
 		37B07B812102C6130077108D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		37B07B822102C6130077108D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		37B07B852102C6130077108D /* socketcan_serial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = socketcan_serial.cpp; sourceTree = "<group>"; };
@@ -10307,8 +10307,8 @@
 				37B07B952102C61C0077108D /* SLCAN.cpp */,
 				37FBC6C92103EDBA006DC19C /* BLE.h */,
 				37FBC6C82103EDBA006DC19C /* BLE.cpp */,
-				370C775D21070F3E00D078CF /* VortexManager.h */,
-				370C775C21070F3E00D078CF /* VortexManager.cpp */,
+				370C775D21070F3E00D078CF /* VortexBluetooth.h */,
+				370C775C21070F3E00D078CF /* VortexBluetooth.cpp */,
 				37B07B962102C61C0077108D /* main.cpp */,
 			);
 			path = src;
@@ -30975,7 +30975,7 @@
 				37B0A4392102D5DC0077108D /* usb_core.o.d in Sources */,
 				37B0A1D12102D5DA0077108D /* padlock.o.d in Sources */,
 				37B09F0D2102D5D90077108D /* resources.c in Sources */,
-				370C775E21070F3E00D078CF /* VortexManager.cpp in Sources */,
+				370C775E21070F3E00D078CF /* VortexBluetooth.cpp in Sources */,
 				37B0A4852102D5DC0077108D /* spark_wiring_tone.o.d in Sources */,
 				37B0A4442102D5DC0077108D /* string_convert.o.d in Sources */,
 				37B0A1B22102D5DA0077108D /* wifi.pb.c in Sources */,

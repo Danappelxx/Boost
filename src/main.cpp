@@ -7,13 +7,11 @@
 #include "application.h"
 #include "carloop.h"
 #include "SLCAN.h"
-#include "VortexManager.h"
-#include <vector>
+#include "VortexBluetooth.h"
 
 SYSTEM_THREAD(ENABLED);
 BLE_SETUP(DISABLED);
 
-BLE::Manager* makeManager();
 void disableCarloop();
 void enableBattery();
 float readBattery();
@@ -22,6 +20,7 @@ void receiveMessages();
 CANChannel can(CAN_D1_D2);
 SLCAN slcan(can);
 float battery;
+std::unique_ptr<BLE::Manager> bluetooth = BLE::vortexBluetooth();
 
 void setup() {
     Serial.begin(9600);
@@ -29,6 +28,8 @@ void setup() {
     // disable carloop's high speed CAN to conserve power since we're not using it
     disableCarloop();
     enableBattery();
+
+    bluetooth->startAdvertising();
 }
 
 void loop() {
