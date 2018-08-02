@@ -26,6 +26,26 @@ namespace BLE {
         mutable std::vector<uint8_t> data;
     };
 
+    class Characteristic;
+    class Descriptor {
+        friend class Manager;
+
+    public:
+        Descriptor(UUID uuid): uuid(uuid) {}
+        virtual const std::vector<uint8_t>& getValue();
+    private:
+        UUID uuid;
+        std::weak_ptr<Characteristic> characteristic;
+    };
+
+    class StaticDescriptor: public Descriptor {
+    public:
+        StaticDescriptor(UUID uuid, const std::vector<uint8_t>& value): Descriptor(uuid), value(value) {}
+        virtual const std::vector<uint8_t>& getValue() { return value; }
+    private:
+        const std::vector<uint8_t> value;
+    };
+
     class Characteristic {
         friend class Manager;
 
@@ -62,7 +82,11 @@ namespace BLE {
             InsufficientResources = ATT_ERROR_INSUFFICIENT_RESOURCES
         };
 
-        Characteristic(const UUID& type, Properties properties, const std::vector<uint8_t>& value);
+        Characteristic(
+            const UUID& type,
+            Properties properties,
+            const std::vector<uint8_t>& value,
+            const std::vector<std::shared_ptr<Descriptor>>& descriptors = {});
 
         virtual std::vector<uint8_t> onRead(uint16_t maxSize) = 0;
         virtual Error onWrite(const std::vector<uint8_t>& newValue) = 0;
@@ -71,9 +95,14 @@ namespace BLE {
         const Properties& getProperties() const { return properties; }
         const std::vector<uint8_t>& getValue() const { return value; }
 
+        bool isDynamic() {
+            return static_cast<uint16_t>(properties) & ATT_PROPERTY_DYNAMIC;
+        }
+
     private:
 
         virtual uint16_t _addCharacteristic() {
+            Serial.println("Adding dynamic characteristic");
             if (getType().is16()) {
                 return ble.addCharacteristicDynamic(
                     getType().data16(),
@@ -93,7 +122,7 @@ namespace BLE {
         Properties properties;
         std::vector<uint8_t> value;
         //TODO:
-        //std::vector<Descriptor> descriptors;
+        std::vector<std::shared_ptr<Descriptor>> descriptors;
     };
 
     inline Characteristic::Properties operator | (Characteristic::Properties lhs, Characteristic::Properties rhs) {
@@ -102,7 +131,7 @@ namespace BLE {
 
     class StaticCharacteristic: public Characteristic {
     public:
-        StaticCharacteristic(const UUID& type, Properties properties, const std::vector<uint8_t>& value) : Characteristic(type, properties, value) {}
+        StaticCharacteristic(const UUID& type, Properties properties, const std::vector<uint8_t>& value, const std::vector<std::shared_ptr<Descriptor>>& descriptors = {}) : Characteristic(type, properties, value, descriptors) {}
 
         std::vector<uint8_t> onRead(uint16_t maxSize) override {
             // SHOULD NEVER HAPPEN!
@@ -117,6 +146,7 @@ namespace BLE {
 
     private:
         uint16_t _addCharacteristic() override {
+            Serial.println("Adding static characteristic");
             if (getType().is16()) {
                 return ble.addCharacteristic(
                     getType().data16(),
@@ -144,7 +174,7 @@ namespace BLE {
     private:
         UUID type;
         std::vector<std::shared_ptr<Characteristic>> characteristics;
-        //TODO:
+        //TODO: do we need secondary services?
         //std::vector<Service> includedServices;
     };
 
@@ -170,8 +200,8 @@ namespace BLE {
         void onConnectedCallback(BLEStatus_t status, uint16_t handle);
         void onDisconnectedCallback(uint16_t handle);
 
-
         std::vector<Service> services;
-        std::map<uint16_t, std::shared_ptr<Characteristic> > characteristicHandles;
+        std::map<uint16_t, std::shared_ptr<Characteristic>> characteristicHandles;
+        std::map<uint16_t, std::shared_ptr<Descriptor>> descriptorHandles;
     };
 }

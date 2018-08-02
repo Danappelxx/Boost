@@ -20,21 +20,28 @@ void receiveMessages();
 CANChannel can(CAN_D1_D2);
 SLCAN slcan(can);
 float battery;
-std::unique_ptr<BLE::Manager> bluetooth = BLE::vortexBluetooth();
+std::unique_ptr<BLE::Manager> bluetooth;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin();
+    delay(5000);
 
     // disable carloop's high speed CAN to conserve power since we're not using it
-    disableCarloop();
-    enableBattery();
+    //disableCarloop();
+    //enableBattery();
 
+    Serial.println("About to init bluetooth");
+    bluetooth = BLE::vortexBluetooth();
+    Serial.println("Initialized bluetooth!");
+
+    Serial.println("About to begin advertising");
     bluetooth->startAdvertising();
+    Serial.println("Began advertising!");
 }
 
 void loop() {
-    battery = readBattery();
-    receiveMessages();
+    //battery = readBattery();
+    //receiveMessages();
 }
 
 void disableCarloop() {
