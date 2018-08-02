@@ -18,12 +18,33 @@ namespace BLE {
         bool is128() const;
 
         uint16_t data16() const;
-        uint8_t* data128() const;
+        const uint8_t* data128() const;
 
         // len 16 = 128 bits
         // len 2 = 16 bits
         // cheating here but btstack doesn't mark anything as const ugh
         mutable std::vector<uint8_t> data;
+    };
+
+    enum class Error: uint8_t {
+        OK = 0,
+        InvalidHandle = ATT_ERROR_INVALID_HANDLE,
+        ReadNotPermitted = ATT_ERROR_READ_NOT_PERMITTED,
+        WriteNotPermitted = ATT_ERROR_WRITE_NOT_PERMITTED,
+        InvalidPDU = ATT_ERROR_INVALID_PDU,
+        InsufficientAuthentication = ATT_ERROR_INSUFFICIENT_AUTHENTICATION,
+        RequestNotSupported = ATT_ERROR_REQUEST_NOT_SUPPORTED,
+        InvalidOffset = ATT_ERROR_INVALID_OFFSET,
+        InsufficientAuthorization = ATT_ERROR_INSUFFICIENT_AUTHORIZATION,
+        PrepareQueueFull = ATT_ERROR_PREPARE_QUEUE_FULL,
+        AttributeNotFound = ATT_ERROR_ATTRIBUTE_NOT_FOUND,
+        AttributeNotLong = ATT_ERROR_ATTRIBUTE_NOT_LONG,
+        InsufficientEncryptionKeySize = ATT_ERROR_INSUFFICIENT_ENCRYPTION_KEY_SIZE,
+        InvalidAttributeValueLength = ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH,
+        UnlikelyError = ATT_ERROR_UNLIKELY_ERROR,
+        InsufficientEncryption = ATT_ERROR_INSUFFICIENT_ENCRYPTION,
+        UnsupportedGroupType = ATT_ERROR_UNSUPPORTED_GROUP_TYPE,
+        InsufficientResources = ATT_ERROR_INSUFFICIENT_RESOURCES
     };
 
     class Characteristic;
@@ -32,8 +53,9 @@ namespace BLE {
 
     public:
         Descriptor(UUID uuid): uuid(uuid) {}
-        virtual const std::vector<uint8_t>& getValue();
-    private:
+        virtual const std::vector<uint8_t>& getValue() = 0;
+        virtual Error setValue(const std::vector<uint8_t>& newValue) = 0;
+    protected:
         UUID uuid;
         std::weak_ptr<Characteristic> characteristic;
     };
@@ -41,9 +63,18 @@ namespace BLE {
     class StaticDescriptor: public Descriptor {
     public:
         StaticDescriptor(UUID uuid, const std::vector<uint8_t>& value): Descriptor(uuid), value(value) {}
-        virtual const std::vector<uint8_t>& getValue() { return value; }
-    private:
-        const std::vector<uint8_t> value;
+        const std::vector<uint8_t>& getValue() override { return value; }
+    protected:
+        std::vector<uint8_t> value;
+    };
+
+    class MutableDescriptor: public StaticDescriptor {
+    public:
+        MutableDescriptor(UUID uuid, const std::vector<uint8_t>& value): StaticDescriptor(uuid, value) {}
+        Error setValue(const std::vector<uint8_t>& newValue) override {
+            value = newValue;
+            return Error::OK;
+        }
     };
 
     class Characteristic {
@@ -58,109 +89,61 @@ namespace BLE {
             Notify = ATT_PROPERTY_NOTIFY,
             Indicate = ATT_PROPERTY_INDICATE,
             AuthenticatedSignedWrites = ATT_PROPERTY_AUTHENTICATED_SIGNED_WRITE,
-            ExtendedProperties = ATT_PROPERTY_EXTENDED_PROPERTIES
-        };
-
-        enum class Error: uint8_t {
-            OK = 0,
-            InvalidHandle = ATT_ERROR_INVALID_HANDLE,
-            ReadNotPermitted = ATT_ERROR_READ_NOT_PERMITTED,
-            WriteNotPermitted = ATT_ERROR_WRITE_NOT_PERMITTED,
-            InvalidPDU = ATT_ERROR_INVALID_PDU,
-            InsufficientAuthentication = ATT_ERROR_INSUFFICIENT_AUTHENTICATION,
-            RequestNotSupported = ATT_ERROR_REQUEST_NOT_SUPPORTED,
-            InvalidOffset = ATT_ERROR_INVALID_OFFSET,
-            InsufficientAuthorization = ATT_ERROR_INSUFFICIENT_AUTHORIZATION,
-            PrepareQueueFull = ATT_ERROR_PREPARE_QUEUE_FULL,
-            AttributeNotFound = ATT_ERROR_ATTRIBUTE_NOT_FOUND,
-            AttributeNotLong = ATT_ERROR_ATTRIBUTE_NOT_LONG,
-            InsufficientEncryptionKeySize = ATT_ERROR_INSUFFICIENT_ENCRYPTION_KEY_SIZE,
-            InvalidAttributeValueLength = ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH,
-            UnlikelyError = ATT_ERROR_UNLIKELY_ERROR,
-            InsufficientEncryption = ATT_ERROR_INSUFFICIENT_ENCRYPTION,
-            UnsupportedGroupType = ATT_ERROR_UNSUPPORTED_GROUP_TYPE,
-            InsufficientResources = ATT_ERROR_INSUFFICIENT_RESOURCES
+            ExtendedProperties = ATT_PROPERTY_EXTENDED_PROPERTIES,
+            Dynamic = ATT_PROPERTY_DYNAMIC
         };
 
         Characteristic(
             const UUID& type,
             Properties properties,
-            const std::vector<uint8_t>& value,
             const std::vector<std::shared_ptr<Descriptor>>& descriptors = {});
 
-        virtual std::vector<uint8_t> onRead(uint16_t maxSize) = 0;
-        virtual Error onWrite(const std::vector<uint8_t>& newValue) = 0;
+        virtual const std::vector<uint8_t>& getValue() = 0;
+        virtual Error setValue(const std::vector<uint8_t>& newValue) = 0;
 
         const UUID& getType() const { return type; }
         const Properties& getProperties() const { return properties; }
-        const std::vector<uint8_t>& getValue() const { return value; }
+        const std::vector<uint8_t>& getValue() const { return getValue(); }
 
         bool isDynamic() {
             return static_cast<uint16_t>(properties) & ATT_PROPERTY_DYNAMIC;
         }
 
-    private:
-
-        virtual uint16_t _addCharacteristic() {
-            Serial.println("Adding dynamic characteristic");
-            if (getType().is16()) {
-                return ble.addCharacteristicDynamic(
-                    getType().data16(),
-                    static_cast<uint16_t>(getProperties()),
-                    const_cast<uint8_t*>(getValue().data()),
-                    getValue().size());
-            } else {
-                return ble.addCharacteristicDynamic(
-                    getType().data128(),
-                    static_cast<uint16_t>(getProperties()),
-                    const_cast<uint8_t*>(getValue().data()),
-                    getValue().size());
-            }
-        }
-
+    protected:
         UUID type;
         Properties properties;
-        std::vector<uint8_t> value;
-        //TODO:
         std::vector<std::shared_ptr<Descriptor>> descriptors;
     };
 
     inline Characteristic::Properties operator | (Characteristic::Properties lhs, Characteristic::Properties rhs) {
         return static_cast<Characteristic::Properties>(static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs));
     }
+    inline Characteristic::Properties operator & (Characteristic::Properties lhs, Characteristic::Properties rhs) {
+        return static_cast<Characteristic::Properties>(static_cast<uint16_t>(lhs) & static_cast<uint16_t>(rhs));
+    }
 
     class StaticCharacteristic: public Characteristic {
     public:
-        StaticCharacteristic(const UUID& type, Properties properties, const std::vector<uint8_t>& value, const std::vector<std::shared_ptr<Descriptor>>& descriptors = {}) : Characteristic(type, properties, value, descriptors) {}
+        StaticCharacteristic(
+            const UUID& type,
+            Properties properties,
+            const std::vector<std::shared_ptr<Descriptor>>& descriptors,
+            const std::vector<uint8_t>& value);
+        StaticCharacteristic(
+            const UUID& type,
+            Properties properties,
+            const std::vector<uint8_t>& value): StaticCharacteristic(type, properties, {}, value) {};
 
-        std::vector<uint8_t> onRead(uint16_t maxSize) override {
-            // SHOULD NEVER HAPPEN!
-            Serial.println("onRead callback called for static characteristic!!");
-            return {};
-        }
-        Error onWrite(const std::vector<uint8_t>& newValue) override {
+        const std::vector<uint8_t>& getValue() override { return value; }
+
+        Error setValue(const std::vector<uint8_t>& newValue) override {
             // SHOULD NEVER HAPPEN!
             Serial.println("onWrite callback called for static characteristic!!");
             return Error::UnlikelyError;
         }
 
-    private:
-        uint16_t _addCharacteristic() override {
-            Serial.println("Adding static characteristic");
-            if (getType().is16()) {
-                return ble.addCharacteristic(
-                    getType().data16(),
-                    static_cast<uint16_t>(getProperties()),
-                    const_cast<uint8_t*>(getValue().data()),
-                    getValue().size());
-            } else {
-                return ble.addCharacteristic(
-                    getType().data128(),
-                    static_cast<uint16_t>(getProperties()),
-                    const_cast<uint8_t*>(getValue().data()),
-                    getValue().size());
-            }
-        }
+    protected:
+        std::vector<uint8_t> value;
     };
 
     class Service {
