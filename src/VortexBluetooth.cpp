@@ -70,15 +70,12 @@ BLE::Service gapService() {
     Service gapService = Service(UUID(BLE_UUID_GAP));
     gapService.addCharacteristic(std::make_shared<StaticCharacteristic>(
         UUID(BLE_UUID_GAP_CHARACTERISTIC_DEVICE_NAME),
-        Characteristic::Properties::Read,
         std::vector<uint8_t>(deviceName.begin(), deviceName.end())));
     gapService.addCharacteristic(std::make_shared<StaticCharacteristic>(
         UUID(BLE_UUID_GAP_CHARACTERISTIC_APPEARANCE),
-        Characteristic::Properties::Read,
         std::vector<uint8_t>{ LOW_BYTE(peripheralAppearance), HIGH_BYTE(peripheralAppearance) }));
     gapService.addCharacteristic(std::make_shared<StaticCharacteristic>(
         UUID(BLE_UUID_GAP_CHARACTERISTIC_PPCP),
-        Characteristic::Properties::Read,
         std::vector<uint8_t>{
             LOW_BYTE(minConnectionInterval), HIGH_BYTE(minConnectionInterval),
             LOW_BYTE(maxConnectionInterval), HIGH_BYTE(maxConnectionInterval),
@@ -89,11 +86,7 @@ BLE::Service gapService() {
 
 BLE::Service gattService() {
     Service gattService = Service(UUID(BLE_UUID_GATT));
-    // NOTE: we wil never change services while running, so we don't need SERVICE_CHANGED
-    //gattService.addCharacteristic(std::make_shared<StaticCharacteristic>(
-    //    UUID(BLE_UUID_GATT_CHARACTERISTIC_SERVICE_CHANGED),
-    //    Characteristic::Properties::Indicate,
-    //    std::vector<uint8_t>{ 0x00, 0x00, 0xFF, 0xFF }));
+    // NOTE: we wil never change services while running, so we don't need the SERVICE_CHANGED characteristic
     return gattService;
 }
 

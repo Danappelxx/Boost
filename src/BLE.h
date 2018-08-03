@@ -47,66 +47,97 @@ namespace BLE {
         InsufficientResources = ATT_ERROR_INSUFFICIENT_RESOURCES
     };
 
+    enum class Properties: uint16_t {
+        None = 0,
+        Broadcast = ATT_PROPERTY_BROADCAST,
+        Read = ATT_PROPERTY_READ,
+        WriteWithoutResponse = ATT_PROPERTY_WRITE_WITHOUT_RESPONSE,
+        Write = ATT_PROPERTY_WRITE,
+        Notify = ATT_PROPERTY_NOTIFY,
+        Indicate = ATT_PROPERTY_INDICATE,
+        AuthenticatedSignedWrites = ATT_PROPERTY_AUTHENTICATED_SIGNED_WRITE,
+        ExtendedProperties = ATT_PROPERTY_EXTENDED_PROPERTIES,
+        Dynamic = ATT_PROPERTY_DYNAMIC
+    };
+    inline Properties operator | (Properties lhs, Properties rhs) {
+        return static_cast<Properties>(static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs));
+    }
+    inline Properties& operator |= (Properties& lhs, Properties rhs) {
+        lhs = lhs | rhs;
+        return lhs;
+    }
+    inline Properties operator & (Properties lhs, Properties rhs) {
+        return static_cast<Properties>(static_cast<uint16_t>(lhs) & static_cast<uint16_t>(rhs));
+    }
+
     class Characteristic;
     class Descriptor {
         friend class Manager;
+        friend class Characteristic;
 
     public:
-        Descriptor(UUID uuid): uuid(uuid) {}
+        Descriptor(const UUID& type, Properties properties): type(type), properties(properties) {}
         virtual const std::vector<uint8_t>& getValue() = 0;
         virtual Error setValue(const std::vector<uint8_t>& newValue) = 0;
+
+        const UUID& getType() const { return type; }
+        const Properties& getProperties() const { return properties; }
+
     protected:
-        UUID uuid;
+        UUID type;
+        Properties properties;
         std::weak_ptr<Characteristic> characteristic;
     };
 
+    // Read-only descriptor with a constant value
     class StaticDescriptor: public Descriptor {
     public:
-        StaticDescriptor(UUID uuid, const std::vector<uint8_t>& value): Descriptor(uuid), value(value) {}
+        StaticDescriptor(const UUID& type, const std::vector<uint8_t>& value): Descriptor(type, Properties::None), value(value) {
+            this->properties |= Properties::Read;
+        }
         const std::vector<uint8_t>& getValue() override { return value; }
+
     protected:
         std::vector<uint8_t> value;
     };
 
+    // Read-write descriptor with a mutable value
     class MutableDescriptor: public StaticDescriptor {
     public:
-        MutableDescriptor(UUID uuid, const std::vector<uint8_t>& value): StaticDescriptor(uuid, value) {}
+        MutableDescriptor(const UUID& type, const std::vector<uint8_t>& value): StaticDescriptor(type, value) {
+            this->properties |= Properties::Read | Properties::Write | Properties::Dynamic;
+        }
         Error setValue(const std::vector<uint8_t>& newValue) override {
             value = newValue;
             return Error::OK;
         }
     };
 
-    class Characteristic {
+    class Characteristic: public std::enable_shared_from_this<Characteristic> {
         friend class Manager;
 
     public:
-        enum class Properties: uint16_t {
-            Broadcast = ATT_PROPERTY_BROADCAST,
-            Read = ATT_PROPERTY_READ,
-            WriteWithoutResponse = ATT_PROPERTY_WRITE_WITHOUT_RESPONSE,
-            Write = ATT_PROPERTY_WRITE,
-            Notify = ATT_PROPERTY_NOTIFY,
-            Indicate = ATT_PROPERTY_INDICATE,
-            AuthenticatedSignedWrites = ATT_PROPERTY_AUTHENTICATED_SIGNED_WRITE,
-            ExtendedProperties = ATT_PROPERTY_EXTENDED_PROPERTIES,
-            Dynamic = ATT_PROPERTY_DYNAMIC
-        };
-
         Characteristic(
             const UUID& type,
-            Properties properties,
-            const std::vector<std::shared_ptr<Descriptor>>& descriptors = {});
+            Properties properties): type(type), properties(properties) {}
 
-        virtual const std::vector<uint8_t>& getValue() = 0;
+        void addDescriptor(std::shared_ptr<Descriptor> descriptor);
+
+        virtual const std::vector<uint8_t>& getValue() const = 0;
         virtual Error setValue(const std::vector<uint8_t>& newValue) = 0;
 
         const UUID& getType() const { return type; }
         const Properties& getProperties() const { return properties; }
-        const std::vector<uint8_t>& getValue() const { return getValue(); }
+        const std::vector<std::shared_ptr<Descriptor>>& getDescriptors() const { return descriptors; }
 
-        bool isDynamic() {
-            return static_cast<uint16_t>(properties) & ATT_PROPERTY_DYNAMIC;
+        bool isDynamic() const {
+            return static_cast<uint16_t>(getProperties() & Properties::Dynamic);
+        }
+        bool isIndicate() const {
+            return static_cast<uint16_t>(getProperties() & Properties::Indicate);
+        }
+        bool isNotify() const {
+            return static_cast<uint16_t>(getProperties() & Properties::Notify);
         }
 
     protected:
@@ -115,26 +146,14 @@ namespace BLE {
         std::vector<std::shared_ptr<Descriptor>> descriptors;
     };
 
-    inline Characteristic::Properties operator | (Characteristic::Properties lhs, Characteristic::Properties rhs) {
-        return static_cast<Characteristic::Properties>(static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs));
-    }
-    inline Characteristic::Properties operator & (Characteristic::Properties lhs, Characteristic::Properties rhs) {
-        return static_cast<Characteristic::Properties>(static_cast<uint16_t>(lhs) & static_cast<uint16_t>(rhs));
-    }
-
+    // Read-only characteristic with a constant value
     class StaticCharacteristic: public Characteristic {
     public:
-        StaticCharacteristic(
-            const UUID& type,
-            Properties properties,
-            const std::vector<std::shared_ptr<Descriptor>>& descriptors,
-            const std::vector<uint8_t>& value);
-        StaticCharacteristic(
-            const UUID& type,
-            Properties properties,
-            const std::vector<uint8_t>& value): StaticCharacteristic(type, properties, {}, value) {};
+        StaticCharacteristic(const UUID& type, const std::vector<uint8_t>& value): Characteristic(type, Properties::None), value(value) {
+            this->properties |= Properties::Read;
+        }
 
-        const std::vector<uint8_t>& getValue() override { return value; }
+        const std::vector<uint8_t>& getValue() const override { return value; }
 
         Error setValue(const std::vector<uint8_t>& newValue) override {
             // SHOULD NEVER HAPPEN!
