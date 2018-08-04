@@ -17,6 +17,41 @@ void enableBattery();
 float readBattery();
 void receiveMessages();
 
+class LEDBlinkerService: public BLE::Service {
+    class BlinkCharacteristic: public BLE::MutableCharacteristic {
+        enum class State: uint8_t {
+            Off = 0,
+            On = 1
+        };
+    public:
+
+        BlinkCharacteristic(): MutableCharacteristic(
+            BLE::UUID({ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 }),
+            { static_cast<uint8_t>(State::Off) }) {
+            pinMode(D7, OUTPUT);
+        }
+
+        virtual BLE::Error setValue(const std::vector<uint8_t>& newValue) override {
+            auto ret = MutableCharacteristic::setValue(newValue);
+            updateLed(getState());
+            return ret;
+        }
+
+        State getState() {
+            return static_cast<State>(getValue()[0]);
+        }
+        void updateLed(State state) {
+            digitalWrite(D7, static_cast<uint8_t>(state));
+        }
+    };
+
+public:
+    LEDBlinkerService():
+        Service(BLE::UUID({ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x17 })) {
+        addCharacteristic(std::make_shared<BlinkCharacteristic>());
+    }
+};
+
 CANChannel can(CAN_D1_D2);
 SLCAN slcan(can);
 float battery;
@@ -33,6 +68,8 @@ void setup() {
     Serial.println("About to init bluetooth");
     bluetooth = BLE::vortexBluetooth();
     Serial.println("Initialized bluetooth!");
+
+    bluetooth->addService(std::make_shared<LEDBlinkerService>());
 
     Serial.println("About to begin advertising");
     bluetooth->startAdvertising();
