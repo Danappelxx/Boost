@@ -1,15 +1,20 @@
 #include "BLE.h"
+#include <assert.h>
 
 //MARK: UUID
+// 16 bit
 BLE::UUID::UUID(uint16_t data) {
     this->data = { LOW_BYTE(data), HIGH_BYTE(data) };
 }
 
+// 128 bit
 BLE::UUID::UUID(const uint8_t (&data)[16]) {
     this->data = std::vector<uint8_t>(data, data + 16);
 }
 
+// 128 bit
 BLE::UUID::UUID(const std::string string) {
+    assert(string.size() == 16);
     const uint8_t* data = reinterpret_cast<const uint8_t*>(string.c_str());
     this->data = std::vector<uint8_t>(data, data + 16);
 }

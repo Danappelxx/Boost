@@ -164,6 +164,18 @@ namespace BLE {
         std::vector<uint8_t> value;
     };
 
+    // Read-write characteristic with a mutable value
+    class MutableCharacteristic: public StaticCharacteristic {
+    public:
+        MutableCharacteristic(const UUID& type, const std::vector<uint8_t>& value): StaticCharacteristic(type, value) {
+            this->properties |= Properties::Read | Properties::Write | Properties::Dynamic;
+        }
+        Error setValue(const std::vector<uint8_t>& newValue) override {
+            value = newValue;
+            return Error::OK;
+        }
+    };
+
     class Service {
     public:
         Service(UUID type);
