@@ -4,7 +4,6 @@
 
 using namespace BLE;
 
-const std::string deviceName = "Vortex";
 const uint16_t peripheralAppearance = BLE_APPEARANCE_UNKNOWN;
 
 // BLE peripheral preferred connection parameters:
@@ -66,35 +65,31 @@ static std::vector<uint8_t> scanResponseData = {
     'V', 'o', 'r', 't', 'e', 'x'
 };
 
-BLE::Service gapService() {
-    Service gapService = Service(UUID(BLE_UUID_GAP));
-    gapService.addCharacteristic(std::make_shared<StaticCharacteristic>(
+BLE::GapService::GapService(const std::string deviceName): Service(UUID(BLE_UUID_GAP)) {
+    addCharacteristic(std::make_shared<StaticCharacteristic>(
         UUID(BLE_UUID_GAP_CHARACTERISTIC_DEVICE_NAME),
         std::vector<uint8_t>(deviceName.begin(), deviceName.end())));
-    gapService.addCharacteristic(std::make_shared<StaticCharacteristic>(
+    addCharacteristic(std::make_shared<StaticCharacteristic>(
         UUID(BLE_UUID_GAP_CHARACTERISTIC_APPEARANCE),
         std::vector<uint8_t>{ LOW_BYTE(peripheralAppearance), HIGH_BYTE(peripheralAppearance) }));
-    gapService.addCharacteristic(std::make_shared<StaticCharacteristic>(
+    addCharacteristic(std::make_shared<StaticCharacteristic>(
         UUID(BLE_UUID_GAP_CHARACTERISTIC_PPCP),
         std::vector<uint8_t>{
             LOW_BYTE(minConnectionInterval), HIGH_BYTE(minConnectionInterval),
             LOW_BYTE(maxConnectionInterval), HIGH_BYTE(maxConnectionInterval),
             LOW_BYTE(slaveLatency), HIGH_BYTE(slaveLatency),
             LOW_BYTE(connectionSupervisionTimeout), HIGH_BYTE(connectionSupervisionTimeout) }));
-    return gapService;
 }
 
-BLE::Service gattService() {
-    Service gattService = Service(UUID(BLE_UUID_GATT));
+BLE::GattService::GattService(): Service(UUID(BLE_UUID_GATT)) {
     // NOTE: we wil never change services while running, so we don't need the SERVICE_CHANGED characteristic
-    return gattService;
 }
 
 std::unique_ptr<BLE::Manager> BLE::vortexBluetooth() {
     std::unique_ptr<Manager> manager(new Manager);
 
-    manager->addService(gapService());
-    manager->addService(gattService());
+    manager->addService(std::make_shared<GapService>("Vortex"));
+    manager->addService(std::make_shared<GattService>());
 
     manager->setAdvertisingParameters(&advertisingParameters);
     manager->setAdvertisementData(advertisementData);

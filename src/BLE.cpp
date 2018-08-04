@@ -117,16 +117,16 @@ BLE::Manager::~Manager() {
     ble.deInit();
 }
 
-void BLE::Manager::addService(Service service) {
+void BLE::Manager::addService(std::shared_ptr<Service> service) {
     services.push_back(service);
 
-    if (service.getType().is16()) {
-        ble.addService(service.getType().data16());
+    if (service->getType().is16()) {
+        ble.addService(service->getType().data16());
     } else {
-        ble.addService(service.getType().data128());
+        ble.addService(service->getType().data128());
     }
 
-    for (const std::shared_ptr<Characteristic>& characteristic : service.getCharacteristics()) {
+    for (const std::shared_ptr<Characteristic>& characteristic : service->getCharacteristics()) {
         // add the characteristic
         uint16_t handle;
         if (characteristic->getType().is16()) {

@@ -184,7 +184,7 @@ namespace BLE {
         Manager();
         ~Manager();
 
-        void addService(Service service);
+        void addService(std::shared_ptr<Service> service);
 
         void setAdvertisingParameters(advParams_t* advertisingParameters);
         //TODO: make wrapper around advertisement data
@@ -201,7 +201,7 @@ namespace BLE {
         void onConnectedCallback(BLEStatus_t status, uint16_t handle);
         void onDisconnectedCallback(uint16_t handle);
 
-        std::vector<Service> services;
+        std::vector<std::shared_ptr<Service>> services;
         std::map<uint16_t, std::shared_ptr<Characteristic>> characteristicHandles;
         std::map<uint16_t, std::shared_ptr<Descriptor>> descriptorHandles;
     };
