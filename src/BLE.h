@@ -117,9 +117,7 @@ namespace BLE {
         friend class Manager;
 
     public:
-        Characteristic(
-            const UUID& type,
-            Properties properties): type(type), properties(properties) {}
+        Characteristic(const UUID& type, Properties properties);
 
         void addDescriptor(std::shared_ptr<Descriptor> descriptor);
 
@@ -144,6 +142,7 @@ namespace BLE {
         UUID type;
         Properties properties;
         std::vector<std::shared_ptr<Descriptor>> descriptors;
+        std::shared_ptr<Descriptor> clientConfigurationDescriptor;
     };
 
     // Read-only characteristic with a constant value

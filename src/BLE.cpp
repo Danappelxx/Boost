@@ -34,6 +34,14 @@ const uint8_t* BLE::UUID::data128() const {
 }
 
 //MARK: Characteristic
+BLE::Characteristic::Characteristic(const UUID& type, Properties properties): type(type), properties(properties) {
+    if (isNotify() || isIndicate()) {
+        this->clientConfigurationDescriptor = std::make_shared<MutableDescriptor>(
+            UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
+            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NONE });
+    }
+}
+
 void BLE::Characteristic::addDescriptor(std::shared_ptr<Descriptor> descriptor) {
     descriptors.push_back(descriptor);
     descriptor->characteristic = shared_from_this();
@@ -160,11 +168,7 @@ void BLE::Manager::addService(Service service) {
         }
 
         // client characteristic configuration descriptor
-        if (characteristic->isNotify() || characteristic->isIndicate()) {
-            std::shared_ptr<MutableDescriptor> descriptor = std::make_shared<MutableDescriptor>(
-                UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
-                std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NONE });
-            characteristic->addDescriptor(descriptor);
+        if (std::shared_ptr<Descriptor> descriptor = characteristic->clientConfigurationDescriptor) {
             descriptorHandles[handle + 1] = descriptor;
             Serial.printlnf("Added client characteristic configuration descriptor handle: %d", handle + 1);
         }
