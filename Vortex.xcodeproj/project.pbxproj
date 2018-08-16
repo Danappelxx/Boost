@@ -2257,6 +2257,14 @@
 		37B0A6D42102D6EE0077108D /* carloop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B922102C6130077108D /* carloop.cpp */; };
 		37B0A6D52102D6F10077108D /* SLCAN.h in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B942102C61C0077108D /* SLCAN.h */; };
 		37B0A6D82102F0D10077108D /* pk_wrap.o.d in Sources */ = {isa = PBXBuildFile; fileRef = 37B0972E2102D5D60077108D /* pk_wrap.o.d */; };
+		37F85F2221190BB900BAF5D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F2121190BB900BAF5D9 /* AppDelegate.swift */; };
+		37F85F2421190BB900BAF5D9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F2321190BB900BAF5D9 /* ViewController.swift */; };
+		37F85F2721190BB900BAF5D9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37F85F2521190BB900BAF5D9 /* Main.storyboard */; };
+		37F85F2921190BBB00BAF5D9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37F85F2821190BBB00BAF5D9 /* Assets.xcassets */; };
+		37F85F2C21190BBB00BAF5D9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37F85F2A21190BBB00BAF5D9 /* LaunchScreen.storyboard */; };
+		37F85F4021190DBF00BAF5D9 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F3F21190DBF00BAF5D9 /* BluetoothManager.swift */; };
+		37F85F442119164A00BAF5D9 /* LEDResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F432119164A00BAF5D9 /* LEDResource.swift */; };
+		37F85F462119165000BAF5D9 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F452119165000BAF5D9 /* Resource.swift */; };
 		37FBC6CA2103EDBA006DC19C /* BLE.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37FBC6C82103EDBA006DC19C /* BLE.cpp */; };
 /* End PBXBuildFile section */
 
@@ -2283,9 +2291,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		370C775A2106E62100D078CF /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
 		370C775C21070F3E00D078CF /* VortexBluetooth.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VortexBluetooth.cpp; sourceTree = "<group>"; };
 		370C775D21070F3E00D078CF /* VortexBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VortexBluetooth.h; sourceTree = "<group>"; };
+		376B4EDA2123812A00BA8DAA /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B07B812102C6130077108D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		37B07B822102C6130077108D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		37B07B852102C6130077108D /* socketcan_serial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = socketcan_serial.cpp; sourceTree = "<group>"; };
@@ -9526,6 +9534,16 @@
 		37B09E0D2102D5D80077108D /* malloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = malloc.c; sourceTree = "<group>"; };
 		37B09E0E2102D5D80077108D /* mallocr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mallocr.c; sourceTree = "<group>"; };
 		37B09E0F2102D5D80077108D /* custom-nano.specs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "custom-nano.specs"; sourceTree = "<group>"; };
+		37F85F1F21190BB900BAF5D9 /* Vortex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vortex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		37F85F2121190BB900BAF5D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		37F85F2321190BB900BAF5D9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		37F85F2621190BB900BAF5D9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		37F85F2821190BBB00BAF5D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		37F85F2B21190BBB00BAF5D9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		37F85F2D21190BBB00BAF5D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		37F85F3F21190DBF00BAF5D9 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		37F85F432119164A00BAF5D9 /* LEDResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LEDResource.swift; sourceTree = "<group>"; };
+		37F85F452119165000BAF5D9 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		37FBC6C82103EDBA006DC19C /* BLE.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BLE.cpp; sourceTree = "<group>"; };
 		37FBC6C92103EDBA006DC19C /* BLE.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BLE.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -10212,6 +10230,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		37F85F1C21190BB900BAF5D9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -10221,7 +10246,9 @@
 				37B07BAF2102D5D10077108D /* particle-firmware */,
 				37B07B7F2102C6130077108D /* lib */,
 				37B07B932102C61C0077108D /* src */,
-				370C775A2106E62100D078CF /* vortex */,
+				37F85F1F21190BB900BAF5D9 /* Vortex.app */,
+				37F85F2021190BB900BAF5D9 /* Vortex */,
+				376B4EDA2123812A00BA8DAA /* vortex */,
 			);
 			sourceTree = "<group>";
 		};
@@ -30147,6 +30174,22 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		37F85F2021190BB900BAF5D9 /* Vortex */ = {
+			isa = PBXGroup;
+			children = (
+				37F85F2121190BB900BAF5D9 /* AppDelegate.swift */,
+				37F85F2321190BB900BAF5D9 /* ViewController.swift */,
+				37F85F3F21190DBF00BAF5D9 /* BluetoothManager.swift */,
+				37F85F452119165000BAF5D9 /* Resource.swift */,
+				37F85F432119164A00BAF5D9 /* LEDResource.swift */,
+				37F85F2521190BB900BAF5D9 /* Main.storyboard */,
+				37F85F2821190BBB00BAF5D9 /* Assets.xcassets */,
+				37F85F2A21190BBB00BAF5D9 /* LaunchScreen.storyboard */,
+				37F85F2D21190BBB00BAF5D9 /* Info.plist */,
+			);
+			path = Vortex;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
@@ -30182,8 +30225,25 @@
 			);
 			name = vortex;
 			productName = vortex;
-			productReference = 370C775A2106E62100D078CF /* vortex */;
+			productReference = 376B4EDA2123812A00BA8DAA /* vortex */;
 			productType = "com.apple.product-type.tool";
+		};
+		37F85F1E21190BB900BAF5D9 /* Vortex */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37F85F3D21190BBB00BAF5D9 /* Build configuration list for PBXNativeTarget "Vortex" */;
+			buildPhases = (
+				37F85F1B21190BB900BAF5D9 /* Sources */,
+				37F85F1C21190BB900BAF5D9 /* Frameworks */,
+				37F85F1D21190BB900BAF5D9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Vortex;
+			productName = Vortex;
+			productReference = 37F85F1F21190BB900BAF5D9 /* Vortex.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -30191,6 +30251,7 @@
 		3739B38F2102C5E1004ED10A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0940;
 				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "Dan Appel";
 				TargetAttributes = {
@@ -30198,6 +30259,9 @@
 						CreatedOnToolsVersion = 9.4.1;
 					};
 					37B07BA52102D5090077108D = {
+						CreatedOnToolsVersion = 9.4.1;
+					};
+					37F85F1E21190BB900BAF5D9 = {
 						CreatedOnToolsVersion = 9.4.1;
 					};
 				};
@@ -30208,6 +30272,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 3739B38E2102C5E1004ED10A;
 			productRefGroup = 3739B38E2102C5E1004ED10A;
@@ -30216,9 +30281,23 @@
 			targets = (
 				37B07B9E2102CC5E0077108D /* firmware */,
 				37B07BA52102D5090077108D /* vortex */,
+				37F85F1E21190BB900BAF5D9 /* Vortex */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		37F85F1D21190BB900BAF5D9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37F85F2C21190BBB00BAF5D9 /* LaunchScreen.storyboard in Resources */,
+				37F85F2921190BBB00BAF5D9 /* Assets.xcassets in Resources */,
+				37F85F2721190BB900BAF5D9 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		37B07BA22102D5090077108D /* Sources */ = {
@@ -31805,6 +31884,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		37F85F1B21190BB900BAF5D9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37F85F2421190BB900BAF5D9 /* ViewController.swift in Sources */,
+				37F85F442119164A00BAF5D9 /* LEDResource.swift in Sources */,
+				37F85F4021190DBF00BAF5D9 /* BluetoothManager.swift in Sources */,
+				37F85F462119165000BAF5D9 /* Resource.swift in Sources */,
+				37F85F2221190BB900BAF5D9 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -31814,6 +31905,25 @@
 			targetProxy = 37B0A6D62102D7880077108D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		37F85F2521190BB900BAF5D9 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				37F85F2621190BB900BAF5D9 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		37F85F2A21190BBB00BAF5D9 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				37F85F2B21190BBB00BAF5D9 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		3739B39C2102C5E1004ED10A /* Debug */ = {
@@ -32017,6 +32127,53 @@
 			};
 			name = Release;
 		};
+		37F85F3921190BBB00BAF5D9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = M3QL4363UT;
+				INFOPLIST_FILE = Vortex/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = me.dvappel.Vortex;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		37F85F3A21190BBB00BAF5D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = M3QL4363UT;
+				INFOPLIST_FILE = Vortex/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = me.dvappel.Vortex;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -32043,6 +32200,15 @@
 			buildConfigurations = (
 				37B07BAB2102D5090077108D /* Debug */,
 				37B07BAC2102D5090077108D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		37F85F3D21190BBB00BAF5D9 /* Build configuration list for PBXNativeTarget "Vortex" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37F85F3921190BBB00BAF5D9 /* Debug */,
+				37F85F3A21190BBB00BAF5D9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
