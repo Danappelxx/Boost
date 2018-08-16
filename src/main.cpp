@@ -26,7 +26,7 @@ class LEDBlinkerService: public BLE::Service {
     public:
 
         BlinkCharacteristic(): MutableCharacteristic(
-            BLE::UUID({ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 }),
+            BLE::UUID("6962CDC6-DCB1-465B-8AA4-23491CAF4840"),
             { static_cast<uint8_t>(State::Off) }) {
             pinMode(D7, OUTPUT);
         }
@@ -47,7 +47,7 @@ class LEDBlinkerService: public BLE::Service {
 
 public:
     LEDBlinkerService():
-        Service(BLE::UUID({ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x17 })) {
+        Service(BLE::UUID("70DA7AB7-4FE2-4614-B092-2E8EC60290BB")) {
         addCharacteristic(std::make_shared<BlinkCharacteristic>());
     }
 };
@@ -64,7 +64,6 @@ void setup() {
     // disable carloop's high speed CAN to conserve power since we're not using it
     //disableCarloop();
     //enableBattery();
-
     Serial.println("About to init bluetooth");
     bluetooth = BLE::vortexBluetooth();
     Serial.println("Initialized bluetooth!");

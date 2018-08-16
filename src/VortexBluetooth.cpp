@@ -41,7 +41,7 @@ const uint16_t minAdvertisingInterval = 0x0030; // 30 ms
 const uint16_t maxAdvertisingInterval = 0x0030; // 30 ms
 const uint8_t advertisingType = BLE_GAP_ADV_TYPE_ADV_IND; // fully open
 const uint8_t addressType = BLE_GAP_ADDR_TYPE_PUBLIC; // 3 byte company id, 3 byte device id
-const uint8_t address[BD_ADDR_LEN] = { 0xd3, 0x33, 0x22, 0x1e, 0x30, 0xb3 }; // random.org
+const uint8_t address[BD_ADDR_LEN] = { 0x13, 0x33, 0x22, 0x00, 0x70, 0x07 }; // one 1, three 3, two 2 - double double o seven
 const uint8_t channelMap = BLE_GAP_ADV_CHANNEL_MAP_ALL; // any channel
 const uint8_t filterPolicy = BLE_GAP_ADV_FP_ANY; // no privacy filters
 static advParams_t advertisingParameters = {
@@ -49,7 +49,7 @@ static advParams_t advertisingParameters = {
     .adv_int_max   = maxAdvertisingInterval,
     .adv_type      = advertisingType,
     .dir_addr_type = addressType,
-    .dir_addr      = { 0xd3, 0x33, 0x22, 0x1e, 0x30, 0xb3 },
+    .dir_addr      = { 0x13, 0x33, 0x22, 0x00, 0x70, 0x07 },
     .channel_map   = channelMap,
     .filter_policy = filterPolicy
 };
@@ -82,18 +82,25 @@ BLE::GapService::GapService(const std::string deviceName): Service(UUID(BLE_UUID
 }
 
 BLE::GattService::GattService(): Service(UUID(BLE_UUID_GATT)) {
-    // NOTE: we wil never change services while running, so we don't need the SERVICE_CHANGED characteristic
+    this->serviceChangedCharacteristic = std::make_shared<IndicateCharacteristic>(
+        UUID(BLE_UUID_GATT_CHARACTERISTIC_SERVICE_CHANGED),
+        std::vector<uint8_t>{ 0x00, 0x00, 0xFF, 0xFF }); // range from uint16(0x0000) to uint16(0xFFFF)
+    addCharacteristic(this->serviceChangedCharacteristic);
 }
 
 std::unique_ptr<BLE::Manager> BLE::vortexBluetooth() {
     std::unique_ptr<Manager> manager(new Manager);
 
-    manager->addService(std::make_shared<GapService>("Vortex"));
-    manager->addService(std::make_shared<GattService>());
-
     manager->setAdvertisingParameters(&advertisingParameters);
     manager->setAdvertisementData(advertisementData);
     manager->setScanResponseData(scanResponseData);
+
+    manager->addService(std::make_shared<GapService>("Vortex"));
+
+    std::shared_ptr<GattService> gattService = std::make_shared<GattService>();
+    manager->addService(gattService);
+
+    manager->serviceChangedCharacteristic = gattService->serviceChangedCharacteristic;
 
     return manager;
 }

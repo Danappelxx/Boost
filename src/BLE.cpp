@@ -1,5 +1,6 @@
 #include "BLE.h"
 #include <assert.h>
+#include <sstream>
 
 //MARK: UUID
 // 16 bit
@@ -12,11 +13,48 @@ BLE::UUID::UUID(const uint8_t (&data)[16]) {
     this->data = std::vector<uint8_t>(data, data + 16);
 }
 
+// converts a single hex char to a number (0 - 15)
+// https://github.com/graeme-hill/crossguid/blob/master/src/guid.cpp#L161
+uint8_t hexDigitToChar(char ch) {
+    // 0-9
+    if (ch > 47 && ch < 58)
+        return ch - 48;
+
+    // a-f
+    if (ch > 96 && ch < 103)
+        return ch - 87;
+
+    // A-F
+    if (ch > 64 && ch < 71)
+        return ch - 55;
+
+    return 0;
+}
+
 // 128 bit
 BLE::UUID::UUID(const std::string string) {
-    assert(string.size() == 16);
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(string.c_str());
-    this->data = std::vector<uint8_t>(data, data + 16);
+    std::vector<uint8_t> data;
+
+    // char 1 is upper bytes, char 2 is lower bytes
+    char char1;
+    char char2;
+    bool wantsCharOne = true;
+    for (char c : string) {
+        if (c == '-')
+            continue;
+
+        if (wantsCharOne)
+            char1 = c;
+        else {
+            char2 = c;
+
+            uint8_t combined = hexDigitToChar(char1) * 16 + hexDigitToChar(char2);
+            data.push_back(combined);
+        }
+
+        wantsCharOne = !wantsCharOne;
+    }
+    this->data = data;
 }
 
 bool BLE::UUID::is16() const {
@@ -39,17 +77,28 @@ const uint8_t* BLE::UUID::data128() const {
 }
 
 //MARK: Characteristic
-BLE::Characteristic::Characteristic(const UUID& type, Properties properties): type(type), properties(properties) {
+BLE::Characteristic::Characteristic(const UUID& type, const Properties& properties): type(type), properties(properties) {
     if (isNotify() || isIndicate()) {
         this->clientConfigurationDescriptor = std::make_shared<MutableDescriptor>(
             UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
-            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NONE });
+            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_INDICATION | GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION });
     }
 }
 
 void BLE::Characteristic::addDescriptor(std::shared_ptr<Descriptor> descriptor) {
     descriptors.push_back(descriptor);
     descriptor->characteristic = shared_from_this();
+}
+
+void BLE::IndicateCharacteristic::sendIndicate() {
+    if (handle == -1) {
+        Serial.println("Characteristic has not been added! Cannot send indicate");
+        return;
+    }
+
+    const std::vector<uint8_t>& value = getValue();
+    // btstack makes a copy, even though it isnt marked as such
+    ble.sendIndicate(handle, const_cast<uint8_t*>(value.data()), value.size());
 }
 
 //MARK: Service
@@ -128,7 +177,7 @@ void BLE::Manager::addService(std::shared_ptr<Service> service) {
     if (service->getType().is16()) {
         ble.addService(service->getType().data16());
     } else {
-        ble.addService(service->getType().data128());
+        ble.addService(const_cast<uint8_t*>(service->getType().data128()));
     }
 
     for (const std::shared_ptr<Characteristic>& characteristic : service->getCharacteristics()) {
@@ -142,33 +191,34 @@ void BLE::Manager::addService(std::shared_ptr<Service> service) {
                 characteristic->getValue().size());
         } else {
             handle = ble.addCharacteristic(
-                characteristic->getType().data128(),
+                const_cast<uint8_t*>(characteristic->getType().data128()),
                 static_cast<uint16_t>(characteristic->getProperties()),
                 const_cast<uint8_t*>(characteristic->getValue().data()),
                 characteristic->getValue().size());
         }
 
         characteristicHandles[handle] = characteristic;
+        characteristic->handle = handle;
         Serial.printlnf("Added characteristic handle: %d", handle);
 
         // add the other descriptors
         for (const std::shared_ptr<Descriptor>& descriptor : characteristic->getDescriptors()) {
-            uint16_t handle;
-            if (descriptor->getType().is16()) {
-                handle = ble.addDescriptor(
-                    descriptor->getType().data16(),
-                    static_cast<uint16_t>(descriptor->getProperties()),
-                    const_cast<uint8_t*>(descriptor->getValue().data()),
-                    descriptor->getValue().size());
-            } else {
-                handle = ble.addDescriptor(
-                    descriptor->getType().data128(),
-                    static_cast<uint16_t>(descriptor->getProperties()),
-                    const_cast<uint8_t*>(descriptor->getValue().data()),
-                    descriptor->getValue().size());
-            }
-
-            descriptorHandles[handle] = descriptor;
+            uint16_t handle = 0;
+//            if (descriptor->getType().is16()) {
+//                handle = ble.addDescriptor(
+//                    descriptor->getType().data16(),
+//                    static_cast<uint16_t>(descriptor->getProperties()),
+//                    const_cast<uint8_t*>(descriptor->getValue().data()),
+//                    descriptor->getValue().size());
+//            } else {
+//                handle = ble.addDescriptor(
+//                    descriptor->getType().data128(),
+//                    static_cast<uint16_t>(descriptor->getProperties()),
+//                    const_cast<uint8_t*>(descriptor->getValue().data()),
+//                    descriptor->getValue().size());
+//            }
+//
+//            descriptorHandles[handle] = descriptor;
             Serial.printlnf("Added descriptor handle: %d", handle);
         }
 
@@ -187,6 +237,7 @@ uint16_t BLE::Manager::onReadCallback(uint16_t handle, uint8_t* buffer, uint16_t
         // if buffer is null, don't copy and just return size
         if (buffer)
             memcpy(buffer, value.data(), bufferSize);
+        Serial.printlnf("Read characteristic, handle: %d, size: %d", handle, value.size());
         return value.size();
     }
 
@@ -196,6 +247,7 @@ uint16_t BLE::Manager::onReadCallback(uint16_t handle, uint8_t* buffer, uint16_t
         // if buffer is null, don't copy and just return size
         if (buffer)
             memcpy(buffer, value.data(), bufferSize);
+        Serial.printlnf("Read characteristic, handle: %d, size: %d", handle, value.size());
         return value.size();
     }
 
@@ -208,12 +260,16 @@ int BLE::Manager::onWriteCallback(uint16_t handle, uint8_t* buffer, uint16_t buf
 
     std::shared_ptr<Characteristic> characteristic = characteristicHandles[handle];
     if (characteristic) {
-        return static_cast<uint8_t>(characteristic->setValue(newValue));
+        uint8_t ret = static_cast<uint8_t>(characteristic->setValue(newValue));
+        Serial.printlnf("Wrote characteristic, handle: %d, code: %d", handle, ret);
+        return ret;
     }
 
     std::shared_ptr<Descriptor> descriptor = descriptorHandles[handle];
     if (descriptor) {
-        return static_cast<uint8_t>(descriptor->setValue(newValue));
+        uint8_t ret = static_cast<uint8_t>(descriptor->setValue(newValue));
+        Serial.printlnf("Wrote descriptor, handle: %d, code: %d", handle, ret);
+        return ret;
     }
 
     Serial.printlnf("Could not find matching characteristic for write! Handle: %d", handle);
@@ -224,6 +280,11 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
     switch (status) {
         case BLE_STATUS_OK:
             Serial.printlnf("Successfully connected to device! Handle: %d", handle);
+
+            if (std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic = this->serviceChangedCharacteristic) {
+                serviceChangedCharacteristic->sendIndicate();
+            }
+
             break;
         case BLE_STATUS_DONE:
             Serial.printlnf("Connection done. Handle: %d", handle);

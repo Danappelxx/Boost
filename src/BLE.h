@@ -117,7 +117,7 @@ namespace BLE {
         friend class Manager;
 
     public:
-        Characteristic(const UUID& type, Properties properties);
+        Characteristic(const UUID& type, const Properties& properties);
 
         void addDescriptor(std::shared_ptr<Descriptor> descriptor);
 
@@ -143,14 +143,15 @@ namespace BLE {
         Properties properties;
         std::vector<std::shared_ptr<Descriptor>> descriptors;
         std::shared_ptr<Descriptor> clientConfigurationDescriptor;
+
+        uint16_t handle = -1;
     };
 
     // Read-only characteristic with a constant value
     class StaticCharacteristic: public Characteristic {
     public:
-        StaticCharacteristic(const UUID& type, const std::vector<uint8_t>& value): Characteristic(type, Properties::None), value(value) {
-            this->properties |= Properties::Read;
-        }
+        StaticCharacteristic(const UUID& type, const std::vector<uint8_t>& value, const Properties& properties = Properties::None)
+            : Characteristic(type, properties | Properties::Read), value(value) {}
 
         const std::vector<uint8_t>& getValue() const override { return value; }
 
@@ -167,13 +168,21 @@ namespace BLE {
     // Read-write characteristic with a mutable value
     class MutableCharacteristic: public StaticCharacteristic {
     public:
-        MutableCharacteristic(const UUID& type, const std::vector<uint8_t>& value): StaticCharacteristic(type, value) {
-            this->properties |= Properties::Read | Properties::Write | Properties::Dynamic;
-        }
+        MutableCharacteristic(const UUID& type, const std::vector<uint8_t>& value, const Properties& properties = Properties::None)
+            : StaticCharacteristic(type, value, properties | Properties::Write | Properties::Dynamic) {}
+
         Error setValue(const std::vector<uint8_t>& newValue) override {
             value = newValue;
             return Error::OK;
         }
+    };
+
+    // Read-only indicatable characteristic
+    class IndicateCharacteristic: public StaticCharacteristic {
+    public:
+        IndicateCharacteristic(const UUID& type, const std::vector<uint8_t>& value, const Properties& properties = Properties::None)
+            : StaticCharacteristic(type, value, properties | Properties::Indicate) {}
+        void sendIndicate();
     };
 
     class Service {
@@ -206,6 +215,9 @@ namespace BLE {
 
         void startAdvertising();
         void stopAdvertising();
+
+        //TODO: do this in a cleaner way
+        std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic;
 
     private:
         uint16_t onReadCallback(uint16_t handle, uint8_t* buffer, uint16_t bufferSize);
