@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		370C775B2106F61600D078CF /* BLE.h in Sources */ = {isa = PBXBuildFile; fileRef = 37FBC6C92103EDBA006DC19C /* BLE.h */; };
 		370C775E21070F3E00D078CF /* VortexBluetooth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370C775C21070F3E00D078CF /* VortexBluetooth.cpp */; };
+		3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */; };
 		37B07BAD2102D55B0077108D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B962102C61C0077108D /* main.cpp */; };
 		37B07BAE2102D55F0077108D /* SLCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B952102C61C0077108D /* SLCAN.cpp */; };
 		37B09E102102D5D90077108D /* mbedtls_communication.inc in Sources */ = {isa = PBXBuildFile; fileRef = 37B07BC02102D5D10077108D /* mbedtls_communication.inc */; };
@@ -2257,6 +2258,7 @@
 		37B0A6D42102D6EE0077108D /* carloop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B922102C6130077108D /* carloop.cpp */; };
 		37B0A6D52102D6F10077108D /* SLCAN.h in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B942102C61C0077108D /* SLCAN.h */; };
 		37B0A6D82102F0D10077108D /* pk_wrap.o.d in Sources */ = {isa = PBXBuildFile; fileRef = 37B0972E2102D5D60077108D /* pk_wrap.o.d */; };
+		37B9954F212529FB00BAB9BA /* BatteryLevelResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B9954E212529FB00BAB9BA /* BatteryLevelResource.swift */; };
 		37F85F2221190BB900BAF5D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F2121190BB900BAF5D9 /* AppDelegate.swift */; };
 		37F85F2421190BB900BAF5D9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F85F2321190BB900BAF5D9 /* ViewController.swift */; };
 		37F85F2721190BB900BAF5D9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37F85F2521190BB900BAF5D9 /* Main.storyboard */; };
@@ -2293,6 +2295,7 @@
 /* Begin PBXFileReference section */
 		370C775C21070F3E00D078CF /* VortexBluetooth.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VortexBluetooth.cpp; sourceTree = "<group>"; };
 		370C775D21070F3E00D078CF /* VortexBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VortexBluetooth.h; sourceTree = "<group>"; };
+		3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteeringWheelResource.swift; sourceTree = "<group>"; };
 		376B4EDA2123812A00BA8DAA /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B07B812102C6130077108D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		37B07B822102C6130077108D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -9534,6 +9537,7 @@
 		37B09E0D2102D5D80077108D /* malloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = malloc.c; sourceTree = "<group>"; };
 		37B09E0E2102D5D80077108D /* mallocr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mallocr.c; sourceTree = "<group>"; };
 		37B09E0F2102D5D80077108D /* custom-nano.specs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "custom-nano.specs"; sourceTree = "<group>"; };
+		37B9954E212529FB00BAB9BA /* BatteryLevelResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryLevelResource.swift; sourceTree = "<group>"; };
 		37F85F1F21190BB900BAF5D9 /* Vortex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vortex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F85F2121190BB900BAF5D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37F85F2321190BB900BAF5D9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -30182,6 +30186,8 @@
 				37F85F3F21190DBF00BAF5D9 /* BluetoothManager.swift */,
 				37F85F452119165000BAF5D9 /* Resource.swift */,
 				37F85F432119164A00BAF5D9 /* LEDResource.swift */,
+				3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */,
+				37B9954E212529FB00BAB9BA /* BatteryLevelResource.swift */,
 				37F85F2521190BB900BAF5D9 /* Main.storyboard */,
 				37F85F2821190BBB00BAF5D9 /* Assets.xcassets */,
 				37F85F2A21190BBB00BAF5D9 /* LaunchScreen.storyboard */,
@@ -31889,9 +31895,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				37F85F2421190BB900BAF5D9 /* ViewController.swift in Sources */,
+				3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */,
 				37F85F442119164A00BAF5D9 /* LEDResource.swift in Sources */,
 				37F85F4021190DBF00BAF5D9 /* BluetoothManager.swift in Sources */,
 				37F85F462119165000BAF5D9 /* Resource.swift in Sources */,
+				37B9954F212529FB00BAB9BA /* BatteryLevelResource.swift in Sources */,
 				37F85F2221190BB900BAF5D9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -32140,7 +32148,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = me.dvappel.Vortex;
+				PRODUCT_BUNDLE_IDENTIFIER = app.danapp.vortex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -32163,7 +32171,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = me.dvappel.Vortex;
+				PRODUCT_BUNDLE_IDENTIFIER = app.danapp.vortex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;

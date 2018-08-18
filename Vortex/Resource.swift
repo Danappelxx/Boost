@@ -65,10 +65,11 @@ extension Resource {
 }
 
 protocol GenericResourceDescription {
+    associatedtype Value: DataConvertible
+
     static var serviceId: CBUUID { get }
     static var characteristicId: CBUUID { get }
-
-    associatedtype Value: DataConvertible
+    static var wantsNotificationsEnabled: Bool { get }
 }
 
 class GenericResource<T: GenericResourceDescription>: Resource {
@@ -78,7 +79,22 @@ class GenericResource<T: GenericResourceDescription>: Resource {
         fileprivate init() {}
     }
 
-    internal var characteristic: CBCharacteristic?
+    internal var characteristic: CBCharacteristic? {
+        didSet {
+            // should only fail if characteristic is nil, but it cannot be
+            do {
+                // if not true, don't bother sending the request
+                if (T.wantsNotificationsEnabled) {
+                    try setNotificationsEnabled(T.wantsNotificationsEnabled)
+                }
+            } catch DataResourceError.characteristicNotConnected {
+                // set to nil, whatever, ignore
+                print("resource's characteristic disconnected")
+            } catch {
+                print("Unexpected error while setting notification settings", error)
+            }
+        }
+    }
     public var callbacks = Callbacks()
 
     public let serviceId: CBUUID = T.serviceId

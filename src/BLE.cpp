@@ -78,10 +78,15 @@ const uint8_t* BLE::UUID::data128() const {
 
 //MARK: Characteristic
 BLE::Characteristic::Characteristic(const UUID& type, const Properties& properties): type(type), properties(properties) {
-    if (isNotify() || isIndicate()) {
+    if (isNotify()) {
         this->clientConfigurationDescriptor = std::make_shared<MutableDescriptor>(
             UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
-            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_INDICATION | GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION });
+            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION, 0 });
+    }
+    if (isIndicate()) {
+        this->clientConfigurationDescriptor = std::make_shared<MutableDescriptor>(
+            UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
+            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_INDICATION, 0 });
     }
 }
 
@@ -97,8 +102,19 @@ void BLE::IndicateCharacteristic::sendIndicate() {
     }
 
     const std::vector<uint8_t>& value = getValue();
-    // btstack makes a copy, even though it isnt marked as such
+    // btstack makes a copy, even though it isn't marked as such
     ble.sendIndicate(handle, const_cast<uint8_t*>(value.data()), value.size());
+}
+
+void BLE::NotifyCharacteristic::sendNotify() {
+    if (handle == -1) {
+        Serial.println("Characteristic has not been added! Cannot send notify");
+        return;
+    }
+
+    const std::vector<uint8_t>& value = getValue();
+    // btstack makes a copy, even though it isn't marked as such
+    ble.sendNotify(handle, const_cast<uint8_t*>(value.data()), value.size());
 }
 
 //MARK: Service
@@ -152,7 +168,7 @@ void _registerCallbacks(
 }
 
 //MARK: Manager
-BLE::Manager::Manager() {
+BLE::Manager::Manager(): connected(false) {
     ble.debugLogger(true);
     ble.debugError(true);
     //ble.enablePacketLogger();
@@ -281,6 +297,8 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
         case BLE_STATUS_OK:
             Serial.printlnf("Successfully connected to device! Handle: %d", handle);
 
+            connected = true;
+
             if (std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic = this->serviceChangedCharacteristic) {
                 serviceChangedCharacteristic->sendIndicate();
             }
@@ -303,6 +321,7 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
 
 void BLE::Manager::onDisconnectedCallback(uint16_t handle) {
     Serial.printlnf("Device disconnected. Handle: %d", handle);
+    connected = false;
 }
 
 void BLE::Manager::setAdvertisingParameters(advParams_t* advertisingParameters) {

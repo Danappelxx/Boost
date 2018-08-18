@@ -35,4 +35,5 @@ struct LED: GenericResourceDescription {
 
     static let serviceId = CBUUID(string: "70DA7AB7-4FE2-4614-B092-2E8EC60290BB")
     static let characteristicId = CBUUID(string: "6962CDC6-DCB1-465B-8AA4-23491CAF4840")
+    static let wantsNotificationsEnabled = false
 }

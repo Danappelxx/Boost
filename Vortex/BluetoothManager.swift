@@ -29,6 +29,13 @@ class ResourceRegistry {
         }
     }
 
+    func disconnect(characteristic: CBCharacteristic) {
+        if let resource = resources[characteristic] {
+            availableResources.append(resource)
+            resources[characteristic] = nil
+        }
+    }
+
     func receivedUpdate(from characteristic: CBCharacteristic) {
         guard let data = characteristic.value else {
             return print("Characteristic has no value!")
@@ -122,6 +129,9 @@ extension BluetoothManager: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print("Disconnected from peripheral", peripheral, error ?? "")
 
+        peripheral.services?
+            .flatMap { $0.characteristics ?? [] }
+            .forEach { resourceRegistry.disconnect(characteristic: $0) }
         self.peripheral = nil
         self.beginScan()
     }

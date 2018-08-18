@@ -177,12 +177,32 @@ namespace BLE {
         }
     };
 
-    // Read-only indicatable characteristic
+    // Indicatable characteristic
     class IndicateCharacteristic: public StaticCharacteristic {
     public:
         IndicateCharacteristic(const UUID& type, const std::vector<uint8_t>& value, const Properties& properties = Properties::None)
             : StaticCharacteristic(type, value, properties | Properties::Indicate) {}
         void sendIndicate();
+
+        Error setValue(const std::vector<uint8_t>& newValue) override {
+            value = newValue;
+            sendIndicate();
+            return Error::OK;
+        }
+    };
+
+    // Notifiable characteristic
+    class NotifyCharacteristic: public StaticCharacteristic {
+    public:
+        NotifyCharacteristic(const UUID& type, const std::vector<uint8_t>& value, const Properties& properties = Properties::None)
+            : StaticCharacteristic(type, value, properties | Properties::Notify) {}
+        void sendNotify();
+
+        Error setValue(const std::vector<uint8_t>& newValue) override {
+            value = newValue;
+            sendNotify();
+            return Error::OK;
+        }
     };
 
     class Service {
@@ -219,6 +239,10 @@ namespace BLE {
         //TODO: do this in a cleaner way
         std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic;
 
+        bool isConnected() {
+            return connected;
+        }
+
     private:
         uint16_t onReadCallback(uint16_t handle, uint8_t* buffer, uint16_t bufferSize);
         int onWriteCallback(uint16_t handle, uint8_t* buffer, uint16_t bufferSize);
@@ -228,5 +252,7 @@ namespace BLE {
         std::vector<std::shared_ptr<Service>> services;
         std::map<uint16_t, std::shared_ptr<Characteristic>> characteristicHandles;
         std::map<uint16_t, std::shared_ptr<Descriptor>> descriptorHandles;
+
+        bool connected;
     };
 }
