@@ -45,11 +45,13 @@ class ViewController: UIViewController {
 
         switch value {
         case .rightUp:
-            let player = MPMusicPlayerController.systemMusicPlayer
-            player.skipToNextItem()
+            SpotifyRemoteManager.shared.next()
         case .rightDown:
-            let player = MPMusicPlayerController.systemMusicPlayer
-            player.skipToPreviousItem()
+            if SpotifyRemoteManager.shared.playing {
+                SpotifyRemoteManager.shared.pause()
+            } else {
+                SpotifyRemoteManager.shared.resume()
+            }
         default: break
         }
     }
