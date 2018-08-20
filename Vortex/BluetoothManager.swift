@@ -21,10 +21,11 @@ class ResourceRegistry {
     }
 
     func discovered(characteristic: CBCharacteristic) {
-        for resource in availableResources {
+        for (index, resource) in availableResources.enumerated() {
             if resource.characteristicId == characteristic.uuid {
                 resource.characteristic = characteristic
                 resources[characteristic] = resource
+                availableResources.remove(at: index)
             }
         }
     }
@@ -132,13 +133,27 @@ extension BluetoothManager: CBCentralManagerDelegate {
         peripheral.services?
             .flatMap { $0.characteristics ?? [] }
             .forEach { resourceRegistry.disconnect(characteristic: $0) }
-        self.peripheral = nil
-        self.beginScan()
+
+        // connection requests do not expire. so, there is no need to scan a second time
+        // app will be woken up when it reconnects to peripheral
+        central.connect(peripheral, options: nil)
     }
 }
 
 extension BluetoothManager: CBPeripheralDelegate {
     // MARK: Peripheral discovery
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        print("Peripheral updated services", peripheral, invalidatedServices)
+
+        for service in invalidatedServices {
+            for characteristic in service.characteristics ?? [] {
+                resourceRegistry.disconnect(characteristic: characteristic)
+            }
+        }
+
+        peripheral.discoverServices(nil)
+    }
+
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         print("Peripheral discovered services", peripheral, error ?? "")
 
