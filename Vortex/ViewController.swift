@@ -47,11 +47,7 @@ class ViewController: UIViewController {
         case .rightUp:
             SpotifyRemoteManager.shared.next()
         case .rightDown:
-            if SpotifyRemoteManager.shared.playing {
-                SpotifyRemoteManager.shared.pause()
-            } else {
-                SpotifyRemoteManager.shared.resume()
-            }
+            SpotifyRemoteManager.shared.togglePlaying()
         default: break
         }
     }
@@ -69,5 +65,17 @@ class ViewController: UIViewController {
         } catch {
             fatalError("unknown error \(error)")
         }
+    }
+
+    @IBAction func playPauseButtonPressed(_ sender: UIButton) {
+        SpotifyRemoteManager.shared.togglePlaying()
+    }
+
+    @IBAction func previousButtonPressed(_ sender: UIButton) {
+        SpotifyRemoteManager.shared.jumpToBeginning()
+    }
+
+    @IBAction func nextButtonPressed(_ sender: UIButton) {
+        SpotifyRemoteManager.shared.next()
     }
 }

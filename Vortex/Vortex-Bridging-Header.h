@@ -8,4 +8,4 @@
 
 #pragma once
 
-#import <SpotifyAppRemote/SpotifyAppRemote.h>
+#import <SpotifyAuthentication/SpotifyAuthentication.h>

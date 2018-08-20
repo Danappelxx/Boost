@@ -22,17 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        SpotifyRemoteManager.shared.didOpenUrl(url)
-
-        return true
+        print("did open url \(url)")
+        if SpotifyRemoteManager.shared.authCallback(url) {
+            return true
+        }
+        return false
     }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        SpotifyRemoteManager.shared.disconnect()
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        SpotifyRemoteManager.shared.connect()
-    }
-
 }
