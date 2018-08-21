@@ -34,6 +34,7 @@ class ResourceRegistry {
         if let resource = resources[characteristic] {
             availableResources.append(resource)
             resources[characteristic] = nil
+            resource.characteristic = nil
         }
     }
 
