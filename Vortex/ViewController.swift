@@ -15,7 +15,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var steeringWheelLabel: UILabel!
     @IBOutlet weak var batteryLevelLabel: UILabel!
 
-    let manager = BluetoothManager()
+    let manager = BluetoothManager.shared
     let ledResource = GenericResource<LED>()
     let steeringWheelResource = GenericResource<SteeringWheel>()
     let batteryLevelResource = GenericResource<BatteryLevel>()

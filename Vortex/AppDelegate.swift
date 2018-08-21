@@ -18,6 +18,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             SpotifyRemoteManager.shared.authorize()
         }
 
+        if let centralsObj = launchOptions?[UIApplicationLaunchOptionsKey.bluetoothCentrals], let centrals = centralsObj as? [String] {
+            if centrals.contains(BluetoothManager.restorationId) {
+                // singleton so just getting it will initialize it
+                let manager = BluetoothManager.shared
+                print("Restored \(BluetoothManager.restorationId)", manager)
+            }
+        }
+
         return true
     }
 

@@ -49,28 +49,39 @@ class ResourceRegistry {
 }
 
 class BluetoothManager: NSObject {
+    static let shared = BluetoothManager()
+    static let restorationId = "VortexCentralManagerIdentifier"
 
     let resourceRegistry = ResourceRegistry()
 
-    let centralManager: CBCentralManager
+    lazy var centralManager: CBCentralManager = {
+        return CBCentralManager(
+            delegate: self,
+            queue: DispatchQueue.main,
+            options: [CBCentralManagerOptionRestoreIdentifierKey: BluetoothManager.restorationId])
+    }()
+
     var peripheral: CBPeripheral?
 
     var wantsScan = false
 
     override init() {
-        self.centralManager = CBCentralManager(delegate: nil, queue: DispatchQueue.main)
         super.init()
-        self.centralManager.delegate = self
+        print(self.centralManager.state)
     }
 
     func beginScan() {
+        if self.peripheral != nil {
+            return
+        }
         if centralManager.state != .poweredOn {
             wantsScan = true
         } else {
             wantsScan = false
             // TODO: get service ids from registry
             print("beginning scan for peripherals")
-            self.centralManager.scanForPeripherals(withServices: nil, options: nil)
+            let services = Array(Set(resourceRegistry.availableResources.map { $0.serviceId }))
+            self.centralManager.scanForPeripherals(withServices: services, options: nil)
         }
     }
 
@@ -85,6 +96,17 @@ class BluetoothManager: NSObject {
 }
 
 extension BluetoothManager: CBCentralManagerDelegate {
+    // MARK: Background restoration
+    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+        print("Manager restoring state!")
+        if let peripherals = dict[CBCentralManagerRestoredStatePeripheralsKey].flatMap({ $0 as? [CBPeripheral] }) {
+            if let peripheral = peripherals.first, peripheral.state == .connected || peripheral.state == .connecting {
+                peripheral.delegate = self
+                self.peripheral = peripheral
+            }
+        }
+    }
+
     // MARK: Central discovery
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         print("Manager updated state", central, central.state.rawValue)
