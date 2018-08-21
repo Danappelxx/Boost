@@ -58,6 +58,10 @@ static std::vector<uint8_t> advertisementData = {
     0x02, // len
     BLE_GAP_AD_TYPE_FLAGS, // advertising type flag
     BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE, // never stops advertising, low energy only
+    0x11, // len
+    BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE, // just one service, no room for more
+    // TODO: not hardcode this
+    0x16, 0x88, 0x7F, 0xD0, 0x6A, 0x40, 0x75, 0xB5, 0xD6, 0x40, 0x49, 0xEA, 0x1D, 0x8B, 0x7E, 0x9A // CAN service uuid
 };
 static std::vector<uint8_t> scanResponseData = {
     0x07,
