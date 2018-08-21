@@ -63,6 +63,9 @@ class BluetoothManager: NSObject {
     }()
 
     var peripheral: CBPeripheral?
+    var services: [CBUUID] {
+        return Array(Set(resourceRegistry.availableResources.map { $0.serviceId }))
+    }
 
     var wantsScan = false
 
@@ -81,8 +84,7 @@ class BluetoothManager: NSObject {
             wantsScan = false
             // TODO: get service ids from registry
             print("beginning scan for peripherals")
-            let services = Array(Set(resourceRegistry.availableResources.map { $0.serviceId }))
-            self.centralManager.scanForPeripherals(withServices: services, options: nil)
+            self.centralManager.scanForPeripherals(withServices: self.services, options: nil)
         }
     }
 
@@ -140,7 +142,7 @@ extension BluetoothManager: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected to peripheral", peripheral)
-        peripheral.discoverServices(nil)
+        peripheral.discoverServices(self.services)
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -174,7 +176,7 @@ extension BluetoothManager: CBPeripheralDelegate {
             }
         }
 
-        peripheral.discoverServices(nil)
+        peripheral.discoverServices(self.services)
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
