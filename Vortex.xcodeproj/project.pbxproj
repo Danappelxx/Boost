@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		370C775B2106F61600D078CF /* BLE.h in Sources */ = {isa = PBXBuildFile; fileRef = 37FBC6C92103EDBA006DC19C /* BLE.h */; };
 		370C775E21070F3E00D078CF /* VortexBluetooth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370C775C21070F3E00D078CF /* VortexBluetooth.cpp */; };
+		37146022212CA58B001E8313 /* Vortex-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 37740B082127CA8D00AB4749 /* Vortex-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		37146023212CA593001E8313 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; };
 		3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */; };
 		372C3B0C2127CE6D00ED91AC /* SpotifyRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */; };
-		37740B0A2127CABE00AB4749 /* Vortex-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 37740B082127CA8D00AB4749 /* Vortex-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		37AE4990212B57CE00EEFA46 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; };
 		37B07BAD2102D55B0077108D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B962102C61C0077108D /* main.cpp */; };
 		37B07BAE2102D55F0077108D /* SLCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B952102C61C0077108D /* SLCAN.cpp */; };
 		37B09E102102D5D90077108D /* mbedtls_communication.inc in Sources */ = {isa = PBXBuildFile; fileRef = 37B07BC02102D5D10077108D /* mbedtls_communication.inc */; };
@@ -2284,16 +2284,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		37740B052127CA2200AB4749 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		37B07BA42102D5090077108D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2312,7 +2302,7 @@
 		372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyRemoteManager.swift; sourceTree = "<group>"; };
 		376B4EDA2123812A00BA8DAA /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37740B082127CA8D00AB4749 /* Vortex-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Vortex-Bridging-Header.h"; sourceTree = "<group>"; };
-		37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = Vortex/SpotifyAuthentication.framework; sourceTree = "<group>"; };
+		37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = iOS/Vortex/SpotifyAuthentication.framework; sourceTree = "<group>"; };
 		37B07B812102C6130077108D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		37B07B822102C6130077108D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		37B07B852102C6130077108D /* socketcan_serial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = socketcan_serial.cpp; sourceTree = "<group>"; };
@@ -10254,7 +10244,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37AE4990212B57CE00EEFA46 /* SpotifyAuthentication.framework in Frameworks */,
+				37146023212CA593001E8313 /* SpotifyAuthentication.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10287,7 +10277,8 @@
 			children = (
 				37B07B802102C6130077108D /* carloop */,
 			);
-			path = lib;
+			name = lib;
+			path = embedded/lib;
 			sourceTree = "<group>";
 		};
 		37B07B802102C6130077108D /* carloop */ = {
@@ -10368,7 +10359,8 @@
 				370C775C21070F3E00D078CF /* VortexBluetooth.cpp */,
 				37B07B962102C61C0077108D /* main.cpp */,
 			);
-			path = src;
+			name = src;
+			path = embedded/src;
 			sourceTree = "<group>";
 		};
 		37B07BAF2102D5D10077108D /* particle-firmware */ = {
@@ -30221,7 +30213,8 @@
 				37F85F2D21190BBB00BAF5D9 /* Info.plist */,
 				37740B082127CA8D00AB4749 /* Vortex-Bridging-Header.h */,
 			);
-			path = Vortex;
+			name = Vortex;
+			path = iOS/Vortex;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -30231,7 +30224,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37740B0A2127CABE00AB4749 /* Vortex-Bridging-Header.h in Headers */,
+				37146022212CA58B001E8313 /* Vortex-Bridging-Header.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -30240,7 +30233,7 @@
 /* Begin PBXLegacyTarget section */
 		37B07B9E2102CC5E0077108D /* firmware */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "all PLATFORM=duo APPDIR=$PROJECT_DIR";
+			buildArgumentsString = "all PLATFORM=duo APPDIR=$PROJECT_DIR/embedded";
 			buildConfigurationList = 37B07B9F2102CC5E0077108D /* Build configuration list for PBXLegacyTarget "firmware" */;
 			buildPhases = (
 			);
@@ -30280,7 +30273,6 @@
 				37F85F1B21190BB900BAF5D9 /* Sources */,
 				37F85F1C21190BB900BAF5D9 /* Frameworks */,
 				37F85F1D21190BB900BAF5D9 /* Resources */,
-				37740B052127CA2200AB4749 /* Embed Frameworks */,
 				37740B092127CAB900AB4749 /* Headers */,
 			);
 			buildRules = (
@@ -32193,8 +32185,9 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Vortex",
+					"$(PROJECT_DIR)/iOS/Vortex",
 				);
-				INFOPLIST_FILE = Vortex/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/iOS/Vortex/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -32206,7 +32199,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "Vortex/Vortex-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "iOS/Vortex/Vortex-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -32224,8 +32217,9 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Vortex",
+					"$(PROJECT_DIR)/iOS/Vortex",
 				);
-				INFOPLIST_FILE = Vortex/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/iOS/Vortex/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -32237,7 +32231,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Vortex/Vortex-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "iOS/Vortex/Vortex-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
