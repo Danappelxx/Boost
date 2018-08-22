@@ -32184,7 +32184,6 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Vortex",
 					"$(PROJECT_DIR)/iOS/Vortex",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Vortex/Info.plist";
@@ -32216,7 +32215,6 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Vortex",
 					"$(PROJECT_DIR)/iOS/Vortex",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Vortex/Info.plist";

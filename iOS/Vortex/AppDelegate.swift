@@ -21,8 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let centralsObj = launchOptions?[UIApplicationLaunchOptionsKey.bluetoothCentrals], let centrals = centralsObj as? [String] {
             if centrals.contains(BluetoothManager.restorationId) {
                 // singleton so just getting it will initialize it
-                let manager = BluetoothManager.shared
-                print("Restored \(BluetoothManager.restorationId)", manager)
+                print("Woke up to restore manager \(BluetoothManager.restorationId)")
             }
         }
 

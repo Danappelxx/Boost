@@ -11,11 +11,12 @@ import MediaPlayer
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var connectionStatusLabel: UILabel!
     @IBOutlet weak var ledSwitch: UISwitch!
     @IBOutlet weak var steeringWheelLabel: UILabel!
     @IBOutlet weak var batteryLevelLabel: UILabel!
 
-    let manager = BluetoothManager.shared
+    let manager = BluetoothManager()
     let ledResource = GenericResource<LED>()
     let steeringWheelResource = GenericResource<SteeringWheel>()
     let batteryLevelResource = GenericResource<BatteryLevel>()
@@ -27,11 +28,22 @@ class ViewController: UIViewController {
         steeringWheelResource.callbacks.receivedNewValue = self.receivedNewValue
         batteryLevelResource.callbacks.receivedNewValue = self.receivedNewValue
 
+        manager.callbacks.connected = self.deviceConnected
+        manager.callbacks.disconnected = self.deviceDisconnected
+
         manager.register(resource: ledResource)
         manager.register(resource: steeringWheelResource)
         manager.register(resource: batteryLevelResource)
 
         manager.beginScan()
+    }
+
+    func deviceConnected() {
+        connectionStatusLabel.text = "connected"
+    }
+
+    func deviceDisconnected() {
+        connectionStatusLabel.text = "disconnected"
     }
 
     func receivedNewValue(_ value: LED.Value) {

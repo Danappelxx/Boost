@@ -12,7 +12,7 @@ public class SpotifyRemoteManager {
     public static let shared = SpotifyRemoteManager()
     private static let apiRootURL = "https://api.spotify.com/v1"
     private static let apiPlayerURL = apiRootURL + "/me/player"
-    private static let apiStatusURL = URL(string: apiPlayerURL)!
+    private static let apiStatusURL = URL(string: apiPlayerURL + "/currently-playing")!
     private static let apiPlayURL = URL(string: apiPlayerURL + "/play")!
     private static let apiPauseURL = URL(string: apiPlayerURL + "/pause")!
     private static let apiNextURL = URL(string: apiPlayerURL + "/next")!
@@ -35,6 +35,7 @@ public class SpotifyRemoteManager {
             return print("Cached access token")
         }
 
+        // app auth is incredibly slow with poor connection
 //        if SPTAuth.supportsApplicationAuthentication() {
 //            UIApplication.shared.open(auth.spotifyAppAuthenticationURL(), options: [:], completionHandler: nil)
 //        } else {
@@ -68,7 +69,7 @@ public class SpotifyRemoteManager {
         let request = authorized(request: request)
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Spotify api error!, error: \(error), response: \(response?.debugDescription ?? "[no response]")")
+                return print("Spotify api error!, error: \(error), response: \(response?.debugDescription ?? "[no response]")")
             }
             let response = response! as! HTTPURLResponse
             print(response)
@@ -84,7 +85,7 @@ public class SpotifyRemoteManager {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             guard let result = try? decoder.decode(T.self, from: data!) else {
-                return print("Failed to decode response", data.flatMap { String(data: $0, encoding: .utf8) } ?? "")
+                return print("Failed to decode response", String(data: data!, encoding: .utf8) ?? "[failed decoding data]")
             }
             callback(result)
         }
@@ -161,12 +162,12 @@ public class SpotifyRemoteManager {
         api(request: statusRequest) { (status: Status) in
             switch status.isPlaying {
             case true:
-                print("something is playing!")
+                print("player status: playing")
                 // playing, so pause it
                 self.pause()
 
             case false:
-                print("nothing is playing!")
+                print("player status: paused")
                 // paused, so play it
                 self.play()
             }

@@ -13,27 +13,20 @@ struct Settings {
 }
 
 class ResourceRegistry {
-    var availableResources: [DataResource] = []
-    var resources: [CBCharacteristic:DataResource] = [:]
+    var resources: [DataResource] = []
 
     func register(resource: DataResource) {
-        availableResources.append(resource)
+        resources.append(resource)
     }
 
     func discovered(characteristic: CBCharacteristic) {
-        for (index, resource) in availableResources.enumerated() {
-            if resource.characteristicId == characteristic.uuid {
-                resource.characteristic = characteristic
-                resources[characteristic] = resource
-                availableResources.remove(at: index)
-            }
+        for resource in resources where resource.characteristicId == characteristic.uuid {
+            resource.characteristic = characteristic
         }
     }
 
     func disconnect(characteristic: CBCharacteristic) {
-        if let resource = resources[characteristic] {
-            availableResources.append(resource)
-            resources[characteristic] = nil
+        for resource in resources where resource.characteristic == characteristic {
             resource.characteristic = nil
         }
     }
@@ -42,16 +35,15 @@ class ResourceRegistry {
         guard let data = characteristic.value else {
             return print("Characteristic has no value!")
         }
-        guard let resource = resources[characteristic] else {
-            return print("No regirested resource for \(characteristic)!")
+        guard let resource = resources.first(where: { $0.characteristic == characteristic }) else {
+            return print("No registered resource for \(characteristic)!")
         }
         resource.received(data: data)
     }
 }
 
 class BluetoothManager: NSObject {
-    static let shared = BluetoothManager()
-    static let restorationId = "VortexCentralManagerIdentifier"
+    static let restorationId = "app.danapp.BluetoothManager.CentralManager"
 
     let resourceRegistry = ResourceRegistry()
 
@@ -64,32 +56,43 @@ class BluetoothManager: NSObject {
 
     var peripheral: CBPeripheral?
     var services: [CBUUID] {
-        return Array(Set(resourceRegistry.availableResources.map { $0.serviceId }))
+        return Array(Set(resourceRegistry.resources.map { $0.serviceId }))
     }
 
+    // true when user calls beginScan()
     var wantsScan = false
 
-    override init() {
-        super.init()
-        print(self.centralManager.state)
+    public struct Callbacks {
+        var connected: (() -> Void)?
+        var disconnected: (() -> Void)?
+
+        fileprivate init() {}
     }
+    var callbacks = Callbacks()
 
     func beginScan() {
-        if self.peripheral != nil {
-            return
+        if let peripheral = self.peripheral {
+            if peripheral.state == .connected || peripheral.state == .connecting {
+                self.wantsScan = false
+                return print("Requested scan but already connected/connecting to a peripheral")
+            } else {
+                self.peripheral = nil
+            }
         }
-        if centralManager.state != .poweredOn {
-            wantsScan = true
-        } else {
-            wantsScan = false
-            // TODO: get service ids from registry
-            print("beginning scan for peripherals")
-            self.centralManager.scanForPeripherals(withServices: self.services, options: nil)
+        guard self.centralManager.state == .poweredOn else {
+            // bluetooth not ready yet, but user already wants scan
+            // beginScan() will be called again once bluetooth is ready
+            self.wantsScan = true
+            return print("Requested scan but bluetooth not ready")
         }
+        // powered on and not connected - begin scan
+        print("Beginning scan for peripherals")
+        self.wantsScan = false
+        self.centralManager.scanForPeripherals(withServices: self.services, options: nil)
     }
 
     func stopScan() {
-        wantsScan = false
+        self.wantsScan = false
         self.centralManager.stopScan()
     }
 
@@ -103,9 +106,20 @@ extension BluetoothManager: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
         print("Manager restoring state!")
         if let peripherals = dict[CBCentralManagerRestoredStatePeripheralsKey].flatMap({ $0 as? [CBPeripheral] }) {
-            if let peripheral = peripherals.first, peripheral.state == .connected || peripheral.state == .connecting {
+            guard let peripheral = peripherals.first else {
+                return print("No peripherals to restore")
+            }
+            switch peripheral.state {
+            case .connected:
+                print("Restored connected peripheral")
                 peripheral.delegate = self
                 self.peripheral = peripheral
+            case .connecting:
+                print("Still connecting to restored peripheral")
+                peripheral.delegate = self
+                self.peripheral = peripheral
+            default:
+                print("Peripheral not worthy of being restored")
             }
         }
     }
@@ -123,8 +137,28 @@ extension BluetoothManager: CBCentralManagerDelegate {
         case .unsupported: print("unsupported")
         }
 
-        if central.state == .poweredOn, self.wantsScan {
+        guard central.state == .poweredOn else {
+            self.peripheral = nil
+            return
+        }
+
+        if let peripheral = self.peripheral {
+            switch peripheral.state {
+            case .connecting:
+                central.connect(peripheral, options: nil)
+                return print("Finishing connecting to peripheral")
+            case .connected:
+                peripheral.discoverServices(self.services)
+                return print("Already connected to peripheral, discovering services!")
+            default:
+                self.peripheral = nil
+                // fallthrough to scan
+            }
+        }
+
+        if self.wantsScan {
             beginScan()
+            return print("Initiating scan since bluetooth is enabled")
         }
     }
 
@@ -142,6 +176,8 @@ extension BluetoothManager: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected to peripheral", peripheral)
+        self.callbacks.connected?()
+
         peripheral.discoverServices(self.services)
     }
 
@@ -154,10 +190,15 @@ extension BluetoothManager: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print("Disconnected from peripheral", peripheral, error ?? "")
+        self.callbacks.disconnected?()
 
-        peripheral.services?
-            .flatMap { $0.characteristics ?? [] }
-            .forEach { resourceRegistry.disconnect(characteristic: $0) }
+        for service in peripheral.services ?? [] {
+            for characteristic in service.characteristics ?? [] {
+                resourceRegistry.disconnect(characteristic: characteristic)
+            }
+        }
+
+        self.peripheral = nil
 
         // connection requests do not expire. so, there is no need to scan a second time
         // app will be woken up when it reconnects to peripheral
