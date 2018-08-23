@@ -25,23 +25,37 @@ public class SpotifyRemoteManager {
         auth.redirectURL = URL(string: "appdanappvortex://")!
         auth.requestedScopes = ["user-read-playback-state", "user-modify-playback-state"]
         auth.sessionUserDefaultsKey = "spotify_session"
+        auth.tokenSwapURL = URL(string: "https://vortex-spotify.danapp.app/swap")
+        auth.tokenRefreshURL = URL(string: "https://vortex-spotify.danapp.app/refresh")
         return auth
     }()
 
     private var authVC: SFSafariViewController?
 
-    public func authorize() {
-        if auth.session?.isValid() ?? false {
-            return print("Cached access token")
+    public func authenticate() {
+        guard let session = auth.session else {
+            return beginAuthenticationFlow()
         }
 
-        // app auth is incredibly slow with poor connection
-//        if SPTAuth.supportsApplicationAuthentication() {
-//            UIApplication.shared.open(auth.spotifyAppAuthenticationURL(), options: [:], completionHandler: nil)
-//        } else {
-            self.authVC = SFSafariViewController(url: auth.spotifyWebAuthenticationURL())
-            UIApplication.shared.delegate?.window??.rootViewController?.present(authVC!, animated: true, completion: nil)
-//        }
+        if session.isValid() {
+            print("Access token still valid")
+        } else {
+            print("Attempting to renew session")
+            auth.renewSession(session) { (error, newSession) in
+                if newSession == nil {
+                    print("Failed to renew session", error ?? "[no error]")
+                    self.beginAuthenticationFlow()
+                } else {
+                    print("Successfully renewed session", error ?? "")
+                }
+            }
+        }
+    }
+
+    private func beginAuthenticationFlow() {
+        print("Authenticating user through spotify site")
+        self.authVC = SFSafariViewController(url: self.auth.spotifyWebAuthenticationURL())
+        UIApplication.shared.delegate?.window??.rootViewController?.present(self.authVC!, animated: true, completion: nil)
     }
 
     public func authCallback(_ url: URL) -> Bool {

@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         DispatchQueue.main.async {
-            SpotifyRemoteManager.shared.authorize()
+            SpotifyRemoteManager.shared.authenticate()
         }
 
         if let centralsObj = launchOptions?[UIApplicationLaunchOptionsKey.bluetoothCentrals], let centrals = centralsObj as? [String] {
