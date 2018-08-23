@@ -81,12 +81,12 @@ BLE::Characteristic::Characteristic(const UUID& type, const Properties& properti
     if (isNotify()) {
         this->clientConfigurationDescriptor = std::make_shared<MutableDescriptor>(
             UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
-            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION, 0 });
+            std::vector<uint8_t>{ 0, 0 });
     }
     if (isIndicate()) {
         this->clientConfigurationDescriptor = std::make_shared<MutableDescriptor>(
             UUID(GATT_CLIENT_CHARACTERISTICS_CONFIGURATION),
-            std::vector<uint8_t>{ GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_INDICATION, 0 });
+            std::vector<uint8_t>{ 0, 0 });
     }
 }
 
@@ -101,6 +101,16 @@ void BLE::IndicateCharacteristic::sendIndicate() {
         return;
     }
 
+    if (!clientConfigurationDescriptor) {
+        Serial.println("Cannot indicate without valid client configuration descriptor");
+        return;
+    }
+
+    if (clientConfigurationDescriptor->getValue()[0] != GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_INDICATION) {
+        Serial.println("Attempted to indicate but indications not enabled");
+        return;
+    }
+
     const std::vector<uint8_t>& value = getValue();
     // btstack makes a copy, even though it isn't marked as such
     ble.sendIndicate(handle, const_cast<uint8_t*>(value.data()), value.size());
@@ -109,6 +119,21 @@ void BLE::IndicateCharacteristic::sendIndicate() {
 void BLE::NotifyCharacteristic::sendNotify() {
     if (handle == -1) {
         Serial.println("Characteristic has not been added! Cannot send notify");
+        return;
+    }
+
+    if (!clientConfigurationDescriptor) {
+        Serial.println("Cannot notify without valid client configuration descriptor");
+        return;
+    }
+
+    if (clientConfigurationDescriptor->getValue()[0] != GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION) {
+        Serial.println("Attempted to notify but notifications not enabled");
+        return;
+    }
+
+    if (!ble.attServerCanSendPacket()) {
+        Serial.println("Attempted to notify but att server busy, cannot send packet");
         return;
     }
 
@@ -296,7 +321,6 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
     switch (status) {
         case BLE_STATUS_OK:
             Serial.printlnf("Successfully connected to device! Handle: %d", handle);
-
             connected = true;
 
             if (std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic = this->serviceChangedCharacteristic) {
@@ -322,6 +346,14 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
 void BLE::Manager::onDisconnectedCallback(uint16_t handle) {
     Serial.printlnf("Device disconnected. Handle: %d", handle);
     connected = false;
+
+    for (const auto& pair : characteristicHandles) {
+        std::shared_ptr<Characteristic> characteristic = pair.second;
+
+        if (std::shared_ptr<Descriptor> descriptor = characteristic->clientConfigurationDescriptor) {
+            descriptor->setValue({ 0, 0 });
+        }
+    }
 }
 
 void BLE::Manager::setAdvertisingParameters(advParams_t* advertisingParameters) {

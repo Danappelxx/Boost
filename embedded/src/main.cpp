@@ -10,6 +10,7 @@
 #include "VortexBluetooth.h"
 
 SYSTEM_THREAD(ENABLED);
+SYSTEM_MODE(MANUAL);
 BLE_SETUP(DISABLED);
 
 void disableCarloop();
@@ -77,6 +78,7 @@ class CANService: public BLE::Service {
             uint16_t value = (uint16_t)(state * 100);
             // split up uint16_t into two
             setValue({ (uint8_t)(value & 0xff), (uint8_t)(value >> 8) });
+            Serial.printlnf("Sent battery value notification: %.2f", state);
         }
     };
 
