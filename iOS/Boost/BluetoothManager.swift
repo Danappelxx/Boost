@@ -1,6 +1,6 @@
 //
 //  Bluetooth.swift
-//  Vortex
+//  Boost
 //
 //  Created by Dan Appel on 8/6/18.
 //  Copyright © 2018 Dan Appel. All rights reserved.
@@ -9,7 +9,7 @@
 import CoreBluetooth
 
 struct Settings {
-    static let deviceName = "Vortex"
+    static let deviceName = "Boost"
 }
 
 class ResourceRegistry {

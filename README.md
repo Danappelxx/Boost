@@ -1,4 +1,4 @@
-# Vortex
+# Boost
 Expose 2011 SAAB 9-3 CAN interfaces over Bluetooth Low Energy.
 
 ## Build Notes
@@ -55,7 +55,7 @@ In any directory, run:
 make --directory=/usr/local/particle-firmware/modules all PLATFORM=duo APPDIR=$PROJECT_DIR
 ```
 
-Firmware outputs in `$PROJECT_DIR/target/Vortex.bin`.
+Firmware outputs in `$PROJECT_DIR/target/Boost.bin`.
 
 #### Xcode
 Build the `firmware` target in Xcode, firmware outputs in `$PROJECT_DIR/target/Vortex.bin`!

@@ -1,4 +1,4 @@
-/* Vortex CAN messenger
+/* Boost CAN messenger
  * Exposes vehicle CAN interfaces over Bluetooth Low Energy
  */
 
@@ -7,7 +7,7 @@
 #include "application.h"
 #include "carloop.h"
 #include "SLCAN.h"
-#include "VortexBluetooth.h"
+#include "Bluetooth.h"
 
 SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(MANUAL);
@@ -116,7 +116,7 @@ void setup() {
     enableBattery();
 
     Serial.println("About to init bluetooth");
-    bluetooth = BLE::vortexBluetooth();
+    bluetooth = BLE::bluetooth();
     Serial.println("Initialized bluetooth!");
 
     digitalWrite(D7, LOW);

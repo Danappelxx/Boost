@@ -1,4 +1,4 @@
-#include "VortexBluetooth.h"
+#include "Bluetooth.h"
 #include <string>
 #include <vector>
 
@@ -64,9 +64,9 @@ static std::vector<uint8_t> advertisementData = {
     0x16, 0x88, 0x7F, 0xD0, 0x6A, 0x40, 0x75, 0xB5, 0xD6, 0x40, 0x49, 0xEA, 0x1D, 0x8B, 0x7E, 0x9A // CAN service uuid
 };
 static std::vector<uint8_t> scanResponseData = {
-    0x07,
+    0x06,
     BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
-    'V', 'o', 'r', 't', 'e', 'x'
+    'B', 'o', 'o', 's', 't'
 };
 
 BLE::GapService::GapService(const std::string deviceName): Service(UUID(BLE_UUID_GAP)) {
@@ -92,14 +92,14 @@ BLE::GattService::GattService(): Service(UUID(BLE_UUID_GATT)) {
     addCharacteristic(this->serviceChangedCharacteristic);
 }
 
-std::unique_ptr<BLE::Manager> BLE::vortexBluetooth() {
+std::unique_ptr<BLE::Manager> BLE::bluetooth() {
     std::unique_ptr<Manager> manager(new Manager);
 
     manager->setAdvertisingParameters(&advertisingParameters);
     manager->setAdvertisementData(advertisementData);
     manager->setScanResponseData(scanResponseData);
 
-    manager->addService(std::make_shared<GapService>("Vortex"));
+    manager->addService(std::make_shared<GapService>("Boost"));
 
     std::shared_ptr<GattService> gattService = std::make_shared<GattService>();
     manager->addService(gattService);

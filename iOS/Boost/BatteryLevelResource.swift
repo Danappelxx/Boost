@@ -1,6 +1,6 @@
 //
 //  BatteryLevelResource.swift
-//  Vortex
+//  Boost
 //
 //  Created by Dan Appel on 8/15/18.
 //  Copyright © 2018 Dan Appel. All rights reserved.

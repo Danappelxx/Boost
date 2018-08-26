@@ -1,6 +1,6 @@
 //
 //  SpotifyRemoteManager.swift
-//  Vortex
+//  Boost
 //
 //  Created by Dan Appel on 8/17/18.
 //  Copyright © 2018 Dan Appel. All rights reserved.
@@ -22,11 +22,11 @@ public class SpotifyRemoteManager {
     private let auth: SPTAuth = {
         let auth = SPTAuth.defaultInstance()!
         auth.clientID = "9a23191fb3f24dda88b0be476bb32a5e"
-        auth.redirectURL = URL(string: "appdanappvortex://")!
+        auth.redirectURL = URL(string: "appdanappBoost://")!
         auth.requestedScopes = ["user-read-playback-state", "user-modify-playback-state"]
         auth.sessionUserDefaultsKey = "spotify_session"
-        auth.tokenSwapURL = URL(string: "https://vortex-spotify.danapp.app/swap")
-        auth.tokenRefreshURL = URL(string: "https://vortex-spotify.danapp.app/refresh")
+        auth.tokenSwapURL = URL(string: "https://Boost-spotify.danapp.app/swap")
+        auth.tokenRefreshURL = URL(string: "https://Boost-spotify.danapp.app/refresh")
         return auth
     }()
 

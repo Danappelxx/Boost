@@ -17,6 +17,6 @@ namespace BLE {
         std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic;
     };
 
-    std::unique_ptr<BLE::Manager> vortexBluetooth();
+    std::unique_ptr<BLE::Manager> boostBluetooth();
 
 }

@@ -19,11 +19,13 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>app.danapp.vortex</string>
+			<string>app.danapp.boost</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>appdanappvortex</string>
+				<string>appdanappboost</string>
 			</array>
 		</dict>
 	</array>
