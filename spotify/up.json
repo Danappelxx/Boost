@@ -1,0 +1,10 @@
+{
+  "name": "boost-spotify",
+  "profile": "boost-spotify",
+  "regions": [
+    "us-west-2"
+  ],
+  "proxy": {
+    "command": "FLASK_APP=app.py python3 -m flask run -p $PORT"
+  }
+}
