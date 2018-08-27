@@ -7,6 +7,35 @@
 //
 
 import SafariServices
+import UserNotifications
+
+enum SpotifyError: Error {
+    case notAuthenticated
+    case networkError
+    case apiError(code: Int)
+    case decodingError(DecodingError)
+
+    static var successCodes: [Int] = [200, 204]
+}
+
+enum SpotifyResult<T> {
+    case success(value: T, code: Int)
+    case error(SpotifyError)
+
+    var value: (value: T, code: Int)? {
+        guard case let .success(value) = self else {
+            return nil
+        }
+        return value
+    }
+
+    var error: SpotifyError? {
+        guard case let .error(error) = self else {
+            return nil
+        }
+        return error
+    }
+}
 
 public class SpotifyRemoteManager {
     public static let shared = SpotifyRemoteManager()
@@ -22,31 +51,42 @@ public class SpotifyRemoteManager {
     private let auth: SPTAuth = {
         let auth = SPTAuth.defaultInstance()!
         auth.clientID = "9a23191fb3f24dda88b0be476bb32a5e"
-        auth.redirectURL = URL(string: "appdanappBoost://")!
+        auth.redirectURL = URL(string: "appdanappboost://")!
         auth.requestedScopes = ["user-read-playback-state", "user-modify-playback-state"]
         auth.sessionUserDefaultsKey = "spotify_session"
-        auth.tokenSwapURL = URL(string: "https://Boost-spotify.danapp.app/swap")
-        auth.tokenRefreshURL = URL(string: "https://Boost-spotify.danapp.app/refresh")
+        auth.tokenSwapURL = URL(string: "https://boost-spotify.danapp.app/swap")
+        auth.tokenRefreshURL = URL(string: "https://boost-spotify.danapp.app/refresh")
         return auth
     }()
 
     private var authVC: SFSafariViewController?
 
-    public func authenticate() {
+    // callback true if was authenticated or is now authenticated
+    // callback false if failed or requires app open to authenticate
+    public func authenticateIfNeeded(callback: ((_ authenticated: Bool) -> ())? = nil) {
         guard let session = auth.session else {
-            return beginAuthenticationFlow()
+            beginAuthenticationFlow()
+            callback?(false)
+            return
         }
 
         if session.isValid() {
             print("Access token still valid")
+            callback?(true)
         } else {
             print("Attempting to renew session")
             auth.renewSession(session) { (error, newSession) in
                 if newSession == nil {
                     print("Failed to renew session", error ?? "[no error]")
-                    self.beginAuthenticationFlow()
+                    if (error as NSError?)?.domain == NSURLErrorDomain {
+                        print("Network error - do not attempt to authenticate in funky ways")
+                    } else {
+                        self.beginAuthenticationFlow()
+                    }
+                    callback?(false)
                 } else {
                     print("Successfully renewed session", error ?? "")
+                    callback?(true)
                 }
             }
         }
@@ -54,8 +94,31 @@ public class SpotifyRemoteManager {
 
     private func beginAuthenticationFlow() {
         print("Authenticating user through spotify site")
+        // ensure in foreground
+        guard UIApplication.shared.applicationState == .active else {
+            print("App in background, send notification alerting user!")
+            return sendForegroundRequiredToAuthenticateSpotifyNotification()
+        }
+
         self.authVC = SFSafariViewController(url: self.auth.spotifyWebAuthenticationURL())
         UIApplication.shared.delegate?.window??.rootViewController?.present(self.authVC!, animated: true, completion: nil)
+    }
+
+    private func sendForegroundRequiredToAuthenticateSpotifyNotification() {
+        precondition(UIApplication.shared.applicationState != .active)
+        let center = UNUserNotificationCenter.current()
+
+        let content = UNMutableNotificationContent()
+        content.title = "Authenticate Spotify"
+        content.body = "Foreground app to authenticate with Spotify"
+        content.sound = UNNotificationSound.default()
+
+        // nil trigger = send immediately
+        let request = UNNotificationRequest(identifier: "AuthenticateSpotify", content: content, trigger: nil)
+
+        center.add(request) { error in
+            print("Added push notification request, error: \(error?.localizedDescription ?? "[]")")
+        }
     }
 
     public func authCallback(_ url: URL) -> Bool {
@@ -67,47 +130,68 @@ public class SpotifyRemoteManager {
         print("Spotify auth callback opened")
 
         auth.handleAuthCallback(withTriggeredAuthURL: url) { error, session in
+            defer {
+                self.authVC?.presentingViewController?.dismiss(animated: true, completion: nil)
+            }
+
             guard let session = session else {
                 return print("failed to authenticate with error", error ?? "[no error]")
             }
 
             print("Successfully authenticated session", session)
-            self.authVC?.presentingViewController?.dismiss(animated: true, completion: nil)
         }
 
         return true
     }
 
-    @discardableResult
-    private func api(request: URLRequest, callback: @escaping (Data?) -> ()) -> URLSessionDataTask {
-        let request = authorized(request: request)
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                return print("Spotify api error!, error: \(error), response: \(response?.debugDescription ?? "[no response]")")
+    private func api(request: URLRequest, callback: @escaping (SpotifyResult<Data>) -> ()) {
+        authenticateIfNeeded { authenticated in
+            guard authenticated else {
+                print("Spotify not yet authenticated")
+                return callback(.error(.notAuthenticated))
             }
-            let response = response! as! HTTPURLResponse
-            print(response)
-            callback(data)
-        }
-        task.resume()
-        return task
-    }
 
-    @discardableResult
-    private func api<T: Decodable>(request: URLRequest, callback: @escaping (T) -> ()) -> URLSessionDataTask {
-        return api(request: request) { data in
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            guard let result = try? decoder.decode(T.self, from: data!) else {
-                return print("Failed to decode response", String(data: data!, encoding: .utf8) ?? "[failed decoding data]")
+            let request = self.authorized(request: request)
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Network error! \(error)")
+                    return callback(.error(.networkError))
+                }
+                // if there was no error then there is definitely an http response
+                let response = response as! HTTPURLResponse
+                if SpotifyError.successCodes.contains(response.statusCode) {
+                    return callback(.success(value: data ?? Data(), code: response.statusCode))
+                } else {
+                    return callback(.error(.apiError(code: response.statusCode)))
+                }
             }
-            callback(result)
+            task.resume()
         }
     }
 
-    @discardableResult
-    private func api(request: URLRequest, callback: @escaping () -> ()) -> URLSessionDataTask {
-        return api(request: request) { data in
+    private func api<T: Decodable>(request: URLRequest, callback: @escaping (SpotifyResult<T>) -> ()) {
+        api(request: request) { result in
+            switch result {
+            case let .error(error):
+                return callback(.error(error))
+            case let .success(value: data, code: code):
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                do {
+                    let result = try decoder.decode(T.self, from: data)
+                    callback(.success(value: result, code: code))
+                } catch let error as DecodingError {
+                    callback(.error(.decodingError(error)))
+                } catch {
+                    // cannot happen
+                    fatalError("JSONDecoder.decode can only throw a DecodingError")
+                }
+            }
+        }
+    }
+
+    private func api(request: URLRequest, callback: @escaping () -> ()) {
+        api(request: request) { data in
             callback()
         }
     }
@@ -173,8 +257,11 @@ public class SpotifyRemoteManager {
         var statusRequest = URLRequest(url: SpotifyRemoteManager.apiStatusURL)
         statusRequest.httpMethod = "GET"
 
-        api(request: statusRequest) { (status: Status) in
-            switch status.isPlaying {
+        api(request: statusRequest) { (result: SpotifyResult<Status?>) in
+            guard let (status, _) = result.value else {
+                return print(result.error!)
+            }
+            switch status?.isPlaying ?? false {
             case true:
                 print("player status: playing")
                 // playing, so pause it

@@ -7,15 +7,23 @@
 //
 
 import UIKit
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+
+        // Request permission for notifications
+        UNUserNotificationCenter.current()
+            .requestAuthorization(options: [.alert, .sound]) { (_, _) in }
+
+        UNUserNotificationCenter.current().delegate = self
+
         DispatchQueue.main.async {
-            SpotifyRemoteManager.shared.authenticate()
+            SpotifyRemoteManager.shared.authenticateIfNeeded()
         }
 
         if let centralsObj = launchOptions?[UIApplicationLaunchOptionsKey.bluetoothCentrals], let centrals = centralsObj as? [String] {
@@ -29,10 +37,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        print("did open url \(url)")
+        print("App opened with url: \(url)")
         if SpotifyRemoteManager.shared.authCallback(url) {
             return true
         }
         return false
+    }
+
+    func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
+    }
+
+    func userNotificationCenter(_: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert, .sound])
     }
 }
