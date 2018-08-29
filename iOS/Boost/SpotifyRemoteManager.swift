@@ -47,6 +47,7 @@ public class SpotifyRemoteManager {
     private static let apiNextURL = URL(string: apiPlayerURL + "/next")!
     private static let apiPrevURL = URL(string: apiPlayerURL + "/previous")!
     private static let apiSeekURL = URL(string: apiPlayerURL + "/seek")!
+    private static let apiToggleURL = URL(string: "https://boost-spotify.danapp.app/toggle")!
 
     private let auth: SPTAuth = {
         let auth = SPTAuth.defaultInstance()!
@@ -254,23 +255,19 @@ public class SpotifyRemoteManager {
             let isPlaying: Bool
         }
 
-        var statusRequest = URLRequest(url: SpotifyRemoteManager.apiStatusURL)
-        statusRequest.httpMethod = "GET"
+        var toggleRequest = URLRequest(url: SpotifyRemoteManager.apiToggleURL)
+        toggleRequest.httpMethod = "PUT"
 
-        api(request: statusRequest) { (result: SpotifyResult<Status?>) in
-            guard let (status, _) = result.value else {
+        api(request: toggleRequest) { (result: SpotifyResult<Status?>) in
+            guard let (newStatus, statusCode) = result.value else {
                 return print(result.error!)
             }
-            switch status?.isPlaying ?? false {
-            case true:
-                print("player status: playing")
-                // playing, so pause it
-                self.pause()
-
-            case false:
-                print("player status: paused")
-                // paused, so play it
-                self.play()
+            if statusCode == 200, let isPlaying = newStatus?.isPlaying {
+                print("Toggled playing, new state: [playing: \(isPlaying)]")
+            } else if statusCode == 204 {
+                print("Failed to toggle as nothing is playing")
+            } else {
+                fatalError("Result should not be a success if status code is non-[200,204]")
             }
         }
     }

@@ -12,6 +12,10 @@ encryption_secret = environ["ENCRYPTION_SECRET"]
 client_callback_url = environ["CLIENT_CALLBACK_URL"]
 
 spotify_token_endpoint = "https://accounts.spotify.com/api/token"
+spotify_status_endpoint = "https://api.spotify.com/v1/me/player/currently-playing"
+spotify_play_endpoint = "https://api.spotify.com/v1/me/player/play"
+spotify_pause_endpoint = "https://api.spotify.com/v1/me/player/pause"
+
 encryption = Fernet(encryption_secret)
 
 def request_swap(auth_code):
@@ -70,3 +74,40 @@ def refresh():
     token_data, status_code = request_refresh(refresh_token=refresh_token)
 
     return jsonify(token_data), status_code
+
+@app.route("/toggle", methods=["PUT"])
+def toggle():
+    """
+    Asks spotify if music is currently playing, and plays/pauses when applicable.
+    Response:
+        - 200 OK with JSON body {is_playing:BOOL} if successfully played/paused
+        - 204 NO_CONTENT if spotify is not playing anything
+        - otherwise, propogates api responses and errors
+    """
+    auth_headers = {
+        "Authorization": request.headers["Authorization"],
+    }
+
+    # https://developer.spotify.com/documentation/web-api/reference/player/get-the-users-currently-playing-track/
+    status_response = requests.get(spotify_status_endpoint, headers=auth_headers)
+    # no music is playing - can't play/pause that
+    if status_response.status_code == requests.codes.no_content:
+        return jsonify(None), requests.codes.no_content
+    # ran into an api error - propogate it
+    if status_response.status_code != requests.codes.ok:
+        return jsonify(status_response.json()), status_response.status_code
+
+    playpause_response = None
+    is_playing = status_response.json()["is_playing"]
+    if is_playing:
+        # https://developer.spotify.com/documentation/web-api/reference/player/pause-a-users-playback/
+        playpause_response = requests.put(spotify_pause_endpoint, headers=auth_headers)
+    else:
+        # https://developer.spotify.com/documentation/web-api/reference/player/start-a-users-playback/
+        playpause_response = requests.put(spotify_play_endpoint, headers=auth_headers)
+
+    if playpause_response.status_code == requests.codes.no_content:
+        # indicate success by flipping `is_playing`
+        return jsonify({"is_playing": not is_playing}), requests.codes.ok
+    else:
+        return jsonify(playpause_response.json()), playpause_response.status_code
