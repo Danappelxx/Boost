@@ -24,6 +24,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        DispatchQueue.main.async {
+            SpotifyRemoteManager.shared.authenticateIfNeeded()
+        }
+
         ledResource.callbacks.receivedNewValue = self.receivedNewValue
         steeringWheelResource.callbacks.receivedNewValue = self.receivedNewValue
         batteryLevelResource.callbacks.receivedNewValue = self.receivedNewValue

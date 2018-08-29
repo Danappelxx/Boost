@@ -22,10 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         UNUserNotificationCenter.current().delegate = self
 
-        DispatchQueue.main.async {
-            SpotifyRemoteManager.shared.authenticateIfNeeded()
-        }
-
         if let centralsObj = launchOptions?[UIApplicationLaunchOptionsKey.bluetoothCentrals], let centrals = centralsObj as? [String] {
             if centrals.contains(BluetoothManager.restorationId) {
                 // singleton so just getting it will initialize it
