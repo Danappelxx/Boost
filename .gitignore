@@ -30,3 +30,12 @@ DerivedData/
 target
 lib
 *.bin
+
+# Python
+*.py[cod]
+
+# Up
+.pypath
+.secrets
+out.zip
+pypath.zip

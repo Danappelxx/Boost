@@ -4,7 +4,28 @@
   "regions": [
     "us-west-2"
   ],
+  "lambda": {
+    "memory": 128
+  },
   "proxy": {
     "command": "FLASK_APP=app.py python3 -m flask run -p $PORT"
+  },
+  "stages": {
+      "production": {
+        "domain": "boost-spotify.danapp.app"
+      }
+    },
+  "hooks": {
+    "build": [
+      "docker build -t boost-spotify-build .",
+      "docker run --rm -v $(pwd):/var/task boost-spotify-build",
+      "unzip -o pypath.zip && rm pypath.zip"
+    ]
+  },
+  "environment": {
+    "CLIENT_ID": "9a23191fb3f24dda88b0be476bb32a5e",
+    "CLIENT_CALLBACK_URL": "appdanappboost://",
+    "CLIENT_SECRET": null,
+    "ENCRYPTION_SECRET": null
   }
 }
