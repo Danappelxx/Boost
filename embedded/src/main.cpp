@@ -5,18 +5,13 @@
 #define PLATFORM_ID 88
 
 #include "application.h"
-#include "carloop.h"
 #include "SLCAN.h"
+#include "BatteryManager.h"
 #include "Bluetooth.h"
 
 SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(MANUAL);
 BLE_SETUP(DISABLED);
-
-void disableCarloop();
-void enableBattery();
-float readBattery();
-void receiveMessages();
 
 class LEDBlinkerService: public BLE::Service {
 public:
@@ -74,12 +69,24 @@ class CANService: public BLE::Service {
             : IndicateCharacteristic(BLE::UUID("63F13CE9-63B0-4ED3-8EBA-27441DDFC18E"), { 0, 0 }) {}
 
         void newState(float state) {
+            if (!readyToSend())
+                return;
+
+            timeLastUpdated = millis();
+
             // two decimals of precision
             uint16_t value = (uint16_t)(state * 100);
             // split up uint16_t into two
             setValue({ (uint8_t)(value & 0xff), (uint8_t)(value >> 8) });
             Serial.printlnf("Sent battery value notification: %.2f", state);
         }
+    private:
+        bool readyToSend() {
+            return (millis() - timeLastUpdated) > SEND_THROTTLE_DELAY;
+        }
+
+        system_tick_t timeLastUpdated = 0;
+        static constexpr system_tick_t SEND_THROTTLE_DELAY = 500;
     };
 
 public:
@@ -96,12 +103,15 @@ public:
 };
 
 CANChannel can(CAN_D1_D2);
+std::shared_ptr<BatteryManager> batteryManager(std::make_shared<BatteryManager>());
 std::unique_ptr<BLE::Manager> bluetooth;
 std::shared_ptr<CANService> canService;
 std::shared_ptr<LEDBlinkerService> ledBlinkerService;
 
 void setup() {
     Serial.begin();
+
+    batteryManager->setup();
 
     pinMode(D7, OUTPUT);
 
@@ -110,10 +120,6 @@ void setup() {
     digitalWrite(D7, LOW);
     delay(1000);
     digitalWrite(D7, HIGH);
-
-    // disable carloop's high speed CAN to conserve power since we're not using it
-    disableCarloop();
-    enableBattery();
 
     Serial.println("About to init bluetooth");
     bluetooth = BLE::bluetooth();
@@ -134,7 +140,6 @@ void setup() {
     can.begin(33333);
 }
 
-unsigned long timeLastSentBattery = 0;
 void loop() {
 
     if (!bluetooth->isConnected()) {
@@ -143,15 +148,15 @@ void loop() {
         delay(750);
         digitalWrite(D7, LOW);
         delay(750);
+
+        // if we are not connected we are advertising, and
+        // we should not be advertising if the car is off
+        batteryManager->sleepIfLowBattery();
+
         return;
     }
 
-    if (millis() - timeLastSentBattery > 500) {
-        canService->batteryCharacteristic->newState(readBattery());
-        timeLastSentBattery = millis();
-    }
-
-    //receiveMessages();
+    canService->batteryCharacteristic->newState(batteryManager->readBattery());
 
     //TODO: make a lil framework out of this
     CANMessage message;
@@ -177,21 +182,4 @@ void printMessage(const CANMessage& message) {
         message.data[5],
         message.data[6],
         message.data[7]);
-}
-
-void disableCarloop() {
-    // https://github.com/carloop/carloop-library/blob/186acf9403c375e9e251769fb4669c9a4d226704/src/carloop.cpp#L82
-    pinMode(CarloopRevision2::CAN_ENABLE_PIN, OUTPUT);
-    digitalWrite(CarloopRevision2::CAN_ENABLE_PIN, CarloopRevision2::CAN_ENABLE_INACTIVE);
-}
-
-void enableBattery() {
-    pinMode(CarloopRevision2::BATTERY_PIN, INPUT);
-}
-
-float readBattery() {
-    static constexpr auto MAX_ANALOG_VALUE = 4096;
-    static constexpr auto MAX_ANALOG_VOLTAGE = 3.3f;
-    auto adcValue = analogRead(CarloopRevision2::BATTERY_PIN);
-    return adcValue * MAX_ANALOG_VOLTAGE / MAX_ANALOG_VALUE * CarloopRevision2::BATTERY_FACTOR;
 }

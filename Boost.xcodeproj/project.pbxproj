@@ -11,6 +11,7 @@
 		370C775E21070F3E00D078CF /* Bluetooth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370C775C21070F3E00D078CF /* Bluetooth.cpp */; };
 		3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */; };
 		372C3B0C2127CE6D00ED91AC /* SpotifyRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */; };
+		373D3D5621486B7400F64A8B /* BatteryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373D3D5421486B7400F64A8B /* BatteryManager.cpp */; };
 		3743F7AD21324D32002C21B0 /* Boost-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		379C4B1D21324ED5002DBD7A /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; };
 		379C4B1E21324ED5002DBD7A /* SpotifyAuthentication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -2312,6 +2313,8 @@
 		370C775D21070F3E00D078CF /* Bluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Bluetooth.h; sourceTree = "<group>"; };
 		3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteeringWheelResource.swift; sourceTree = "<group>"; };
 		372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyRemoteManager.swift; sourceTree = "<group>"; };
+		373D3D5421486B7400F64A8B /* BatteryManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatteryManager.cpp; sourceTree = "<group>"; };
+		373D3D5521486B7400F64A8B /* BatteryManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BatteryManager.h; sourceTree = "<group>"; };
 		3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Boost-Bridging-Header.h"; sourceTree = "<group>"; };
 		376B4EDA2123812A00BA8DAA /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
 		37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = iOS/Boost/SpotifyAuthentication.framework; sourceTree = "<group>"; };
@@ -10367,6 +10370,8 @@
 				37B07B952102C61C0077108D /* SLCAN.cpp */,
 				37FBC6C92103EDBA006DC19C /* BLE.h */,
 				37FBC6C82103EDBA006DC19C /* BLE.cpp */,
+				373D3D5421486B7400F64A8B /* BatteryManager.cpp */,
+				373D3D5521486B7400F64A8B /* BatteryManager.h */,
 				370C775D21070F3E00D078CF /* Bluetooth.h */,
 				370C775C21070F3E00D078CF /* Bluetooth.cpp */,
 				37B07B962102C61C0077108D /* main.cpp */,
@@ -31194,6 +31199,7 @@
 				37B09E3C2102D5D90077108D /* ssl_cli.c in Sources */,
 				37B0A6392102D5DE0077108D /* import_wifi_resources.c in Sources */,
 				37B0A6742102D5DE0077108D /* decode_alltypes_callback.c in Sources */,
+				373D3D5621486B7400F64A8B /* BatteryManager.cpp in Sources */,
 				37B0A24E2102D5DB0077108D /* pkwrite.o.d in Sources */,
 				37B0A18B2102D5DA0077108D /* hal_peripherals.c in Sources */,
 				37B0A1972102D5DA0077108D /* makefile in Sources */,
