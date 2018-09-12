@@ -14,4 +14,5 @@ private:
     void enableBatteryReadings();
 
     static constexpr float SLEEP_THRESHOLD = 14.00f;
+    static constexpr float MIN_VEHICLE_BATTERY = 10.00f;
 };

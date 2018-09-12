@@ -1,5 +1,5 @@
 #include "BatteryManager.h"
-#include "Carloop.h"
+#include "carloop.h"
 
 void BatteryManager::setup() {
     // disable carloop's high speed CAN to conserve power since we're not using it
@@ -28,7 +28,8 @@ float BatteryManager::readBattery() {
 }
 
 void BatteryManager::sleepIfLowBattery() {
-    if (readBattery() < SLEEP_THRESHOLD) {
+    float battery = readBattery();
+    if (battery < SLEEP_THRESHOLD && battery > MIN_VEHICLE_BATTERY) {
         // sleep indefinitely (seconds=0)
         // wake up when a rising edge signal is applied to the WKP pin or the reset button is pressed
         System.sleep(SLEEP_MODE_DEEP, 0);
