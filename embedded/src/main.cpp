@@ -151,7 +151,9 @@ void loop() {
 
         // if we are not connected we are advertising, and
         // we should not be advertising if the car is off
-        batteryManager->sleepIfLowBattery();
+        // give it 15 seconds to connect first though
+        if (millis() > 15000)
+            batteryManager->sleepIfLowBattery();
 
         return;
     }

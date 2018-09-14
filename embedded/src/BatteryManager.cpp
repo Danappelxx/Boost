@@ -5,9 +5,6 @@ void BatteryManager::setup() {
     // disable carloop's high speed CAN to conserve power since we're not using it
     disableCarloop();
     enableBatteryReadings();
-
-    // right off the bat - if the vehicle is off then go back to sleep.
-    sleepIfLowBattery();
 }
 
 void BatteryManager::disableCarloop() {
@@ -29,7 +26,7 @@ float BatteryManager::readBattery() {
 
 void BatteryManager::sleepIfLowBattery() {
     float battery = readBattery();
-    if (battery < SLEEP_THRESHOLD && battery > MIN_VEHICLE_BATTERY) {
+    if (battery > IS_VEHICLE_BATTERY_THRESHOLD && battery < IS_VEHICLE_OFF_THRESHOLD) {
         // sleep indefinitely (seconds=0)
         // wake up when a rising edge signal is applied to the WKP pin or the reset button is pressed
         System.sleep(SLEEP_MODE_DEEP, 0);

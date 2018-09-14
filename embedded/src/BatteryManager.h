@@ -13,6 +13,6 @@ private:
     void disableCarloop();
     void enableBatteryReadings();
 
-    static constexpr float SLEEP_THRESHOLD = 14.00f;
-    static constexpr float MIN_VEHICLE_BATTERY = 10.00f;
+    static constexpr float IS_VEHICLE_OFF_THRESHOLD = 13.75f;
+    static constexpr float IS_VEHICLE_BATTERY_THRESHOLD = 10.00f;
 };
