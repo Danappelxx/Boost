@@ -12,9 +12,9 @@
 		3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */; };
 		372C3B0C2127CE6D00ED91AC /* SpotifyRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */; };
 		373D3D5621486B7400F64A8B /* BatteryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373D3D5421486B7400F64A8B /* BatteryManager.cpp */; };
-		3743F7AD21324D32002C21B0 /* Boost-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		379C4B1D21324ED5002DBD7A /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; };
-		379C4B1E21324ED5002DBD7A /* SpotifyAuthentication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		37ADC1EA214F14E60037A5EC /* Boost-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		37ADC1EB214F151B0037A5EC /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; };
+		37ADC1EC214F151B0037A5EC /* SpotifyAuthentication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		37B07BAD2102D55B0077108D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B962102C61C0077108D /* main.cpp */; };
 		37B07BAE2102D55F0077108D /* SLCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B07B952102C61C0077108D /* SLCAN.cpp */; };
 		37B09E102102D5D90077108D /* mbedtls_communication.inc in Sources */ = {isa = PBXBuildFile; fileRef = 37B07BC02102D5D10077108D /* mbedtls_communication.inc */; };
@@ -2286,13 +2286,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		379C4B1F21324ED6002DBD7A /* Embed Frameworks */ = {
+		37ADC1ED214F151B0037A5EC /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				379C4B1E21324ED5002DBD7A /* SpotifyAuthentication.framework in Embed Frameworks */,
+				37ADC1EC214F151B0037A5EC /* SpotifyAuthentication.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2316,8 +2316,8 @@
 		373D3D5421486B7400F64A8B /* BatteryManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatteryManager.cpp; sourceTree = "<group>"; };
 		373D3D5521486B7400F64A8B /* BatteryManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BatteryManager.h; sourceTree = "<group>"; };
 		3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Boost-Bridging-Header.h"; sourceTree = "<group>"; };
-		376B4EDA2123812A00BA8DAA /* vortex */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = vortex; sourceTree = BUILT_PRODUCTS_DIR; };
-		37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = iOS/Boost/SpotifyAuthentication.framework; sourceTree = "<group>"; };
+		37ADC1EE214F16F10037A5EC /* boost */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = boost; sourceTree = BUILT_PRODUCTS_DIR; };
+		37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = iOS/SpotifyAuthentication.framework; sourceTree = "<group>"; };
 		37B07B812102C6130077108D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		37B07B822102C6130077108D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		37B07B852102C6130077108D /* socketcan_serial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = socketcan_serial.cpp; sourceTree = "<group>"; };
@@ -10259,7 +10259,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				379C4B1D21324ED5002DBD7A /* SpotifyAuthentication.framework in Frameworks */,
+				37ADC1EB214F151B0037A5EC /* SpotifyAuthentication.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10282,8 +10282,8 @@
 				37B07B932102C61C0077108D /* src */,
 				37F85F1F21190BB900BAF5D9 /* Boost.app */,
 				37F85F2021190BB900BAF5D9 /* Boost */,
-				376B4EDA2123812A00BA8DAA /* vortex */,
 				372C3B092127CE5700ED91AC /* Frameworks */,
+				37ADC1EE214F16F10037A5EC /* boost */,
 			);
 			sourceTree = "<group>";
 		};
@@ -30231,7 +30231,7 @@
 				37F85F2D21190BBB00BAF5D9 /* Info.plist */,
 			);
 			name = Boost;
-			path = iOS/Boost;
+			path = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -30241,7 +30241,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3743F7AD21324D32002C21B0 /* Boost-Bridging-Header.h in Headers */,
+				37ADC1EA214F14E60037A5EC /* Boost-Bridging-Header.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -30265,9 +30265,9 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
-		37B07BA52102D5090077108D /* vortex */ = {
+		37B07BA52102D5090077108D /* boost */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 37B07BAA2102D5090077108D /* Build configuration list for PBXNativeTarget "vortex" */;
+			buildConfigurationList = 37B07BAA2102D5090077108D /* Build configuration list for PBXNativeTarget "boost" */;
 			buildPhases = (
 				37B07BA22102D5090077108D /* Sources */,
 				37B07BA32102D5090077108D /* Frameworks */,
@@ -30278,9 +30278,9 @@
 			dependencies = (
 				37B0A6D72102D7880077108D /* PBXTargetDependency */,
 			);
-			name = vortex;
+			name = boost;
 			productName = vortex;
-			productReference = 376B4EDA2123812A00BA8DAA /* vortex */;
+			productReference = 37ADC1EE214F16F10037A5EC /* boost */;
 			productType = "com.apple.product-type.tool";
 		};
 		37F85F1E21190BB900BAF5D9 /* Boost */ = {
@@ -30291,7 +30291,7 @@
 				37F85F1C21190BB900BAF5D9 /* Frameworks */,
 				37F85F1D21190BB900BAF5D9 /* Resources */,
 				37740B092127CAB900AB4749 /* Headers */,
-				379C4B1F21324ED6002DBD7A /* Embed Frameworks */,
+				37ADC1ED214F151B0037A5EC /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -30342,7 +30342,7 @@
 			projectRoot = "";
 			targets = (
 				37B07B9E2102CC5E0077108D /* firmware */,
-				37B07BA52102D5090077108D /* vortex */,
+				37B07BA52102D5090077108D /* boost */,
 				37F85F1E21190BB900BAF5D9 /* Boost */,
 			);
 		};
@@ -32203,9 +32203,9 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/iOS/Boost",
+					"$(PROJECT_DIR)/iOS",
 				);
-				INFOPLIST_FILE = "$(SRCROOT)/iOS/Boost/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -32217,7 +32217,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/$(PRODUCT_NAME)/$(PRODUCT_NAME)-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "iOS/$(PRODUCT_NAME)-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -32234,9 +32234,9 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/iOS/Boost",
+					"$(PROJECT_DIR)/iOS",
 				);
-				INFOPLIST_FILE = "$(SRCROOT)/iOS/Boost/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -32248,7 +32248,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/$(PRODUCT_NAME)/$(PRODUCT_NAME)-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "iOS/$(PRODUCT_NAME)-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -32277,7 +32277,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		37B07BAA2102D5090077108D /* Build configuration list for PBXNativeTarget "vortex" */ = {
+		37B07BAA2102D5090077108D /* Build configuration list for PBXNativeTarget "boost" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				37B07BAB2102D5090077108D /* Debug */,
