@@ -1,3 +1,7 @@
+<p align="center">
+<img src="logo.png" height="200" width="200"/>
+</p>
+
 # Boost
 > Expose 2011 SAAB 9-3 CAN interfaces over Bluetooth Low Energy.
 
