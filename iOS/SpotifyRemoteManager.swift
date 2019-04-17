@@ -76,8 +76,10 @@ public class SpotifyRemoteManager {
             callback?(true)
         } else {
             print("Attempting to renew session")
+            Notifications.send(.spotifyRenewingSession)
             auth.renewSession(session) { (error, newSession) in
                 if newSession == nil {
+                    Notifications.error(message: "Failed to renew session")
                     print("Failed to renew session", error ?? "[no error]")
                     if (error as NSError?)?.domain == NSURLErrorDomain {
                         print("Network error - do not attempt to authenticate in funky ways")
@@ -86,6 +88,7 @@ public class SpotifyRemoteManager {
                     }
                     callback?(false)
                 } else {
+                    Notifications.send(.spotifyRenewedSession)
                     print("Successfully renewed session", error ?? "")
                     callback?(true)
                 }
@@ -98,28 +101,11 @@ public class SpotifyRemoteManager {
         // ensure in foreground
         guard UIApplication.shared.applicationState == .active else {
             print("App in background, send notification alerting user!")
-            return sendForegroundRequiredToAuthenticateSpotifyNotification()
+            return Notifications.send(.foregroundRequiredToAuthenticateSpotify)
         }
 
         self.authVC = SFSafariViewController(url: self.auth.spotifyWebAuthenticationURL())
         UIApplication.shared.delegate?.window??.rootViewController?.present(self.authVC!, animated: true, completion: nil)
-    }
-
-    private func sendForegroundRequiredToAuthenticateSpotifyNotification() {
-        precondition(UIApplication.shared.applicationState != .active)
-        let center = UNUserNotificationCenter.current()
-
-        let content = UNMutableNotificationContent()
-        content.title = "Authenticate Spotify"
-        content.body = "Foreground app to authenticate with Spotify"
-        content.sound = UNNotificationSound.default()
-
-        // nil trigger = send immediately
-        let request = UNNotificationRequest(identifier: "AuthenticateSpotify", content: content, trigger: nil)
-
-        center.add(request) { error in
-            print("Added push notification request, error: \(error?.localizedDescription ?? "[]")")
-        }
     }
 
     public func authCallback(_ url: URL) -> Bool {
@@ -136,6 +122,7 @@ public class SpotifyRemoteManager {
             }
 
             guard let session = session else {
+                Notifications.error(message: "Failed to authenticate")
                 return print("failed to authenticate with error", error ?? "[no error]")
             }
 
@@ -204,6 +191,8 @@ public class SpotifyRemoteManager {
     }
 
     public func next() {
+        Notifications.send(.spotifySkip)
+
         var nextRequest = URLRequest(url: SpotifyRemoteManager.apiNextURL)
         nextRequest.httpMethod = "POST"
 
@@ -251,6 +240,8 @@ public class SpotifyRemoteManager {
     }
 
     public func togglePlaying() {
+        Notifications.send(.spotifyPlayPause)
+
         struct Status: Codable {
             let isPlaying: Bool
         }

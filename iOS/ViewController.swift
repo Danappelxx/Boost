@@ -44,7 +44,9 @@ class ViewController: UIViewController {
 
     func deviceConnected() {
         connectionStatusLabel.text = "connected"
+
         DispatchQueue.main.async {
+            Notifications.send(.deviceConnected)
             SpotifyRemoteManager.shared.authenticateIfNeeded()
         }
     }

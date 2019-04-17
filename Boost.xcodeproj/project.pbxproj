@@ -12,6 +12,7 @@
 		3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3726AB2E21251AF000CEA335 /* SteeringWheelResource.swift */; };
 		372C3B0C2127CE6D00ED91AC /* SpotifyRemoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */; };
 		373D3D5621486B7400F64A8B /* BatteryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373D3D5421486B7400F64A8B /* BatteryManager.cpp */; };
+		37889A982267BF7300443053 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37889A972267BF7300443053 /* Notifications.swift */; };
 		37ADC1EA214F14E60037A5EC /* Boost-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		37ADC1EB214F151B0037A5EC /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; };
 		37ADC1EC214F151B0037A5EC /* SpotifyAuthentication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -2316,6 +2317,7 @@
 		373D3D5421486B7400F64A8B /* BatteryManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatteryManager.cpp; sourceTree = "<group>"; };
 		373D3D5521486B7400F64A8B /* BatteryManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BatteryManager.h; sourceTree = "<group>"; };
 		3743F7AC21324D31002C21B0 /* Boost-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Boost-Bridging-Header.h"; sourceTree = "<group>"; };
+		37889A972267BF7300443053 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		37ADC1EE214F16F10037A5EC /* boost */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = boost; sourceTree = BUILT_PRODUCTS_DIR; };
 		37AE498F212B57CE00EEFA46 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = iOS/SpotifyAuthentication.framework; sourceTree = "<group>"; };
 		37B07B812102C6130077108D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -30217,6 +30219,7 @@
 			isa = PBXGroup;
 			children = (
 				37F85F2121190BB900BAF5D9 /* AppDelegate.swift */,
+				37889A972267BF7300443053 /* Notifications.swift */,
 				372C3B0B2127CE6D00ED91AC /* SpotifyRemoteManager.swift */,
 				37F85F2321190BB900BAF5D9 /* ViewController.swift */,
 				37F85F3F21190DBF00BAF5D9 /* BluetoothManager.swift */,
@@ -30309,7 +30312,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0940;
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "Dan Appel";
 				TargetAttributes = {
 					37B07B9E2102CC5E0077108D = {
@@ -31954,6 +31957,7 @@
 				37F85F2421190BB900BAF5D9 /* ViewController.swift in Sources */,
 				3726AB2F21251AF000CEA335 /* SteeringWheelResource.swift in Sources */,
 				372C3B0C2127CE6D00ED91AC /* SpotifyRemoteManager.swift in Sources */,
+				37889A982267BF7300443053 /* Notifications.swift in Sources */,
 				37F85F442119164A00BAF5D9 /* LEDResource.swift in Sources */,
 				37F85F4021190DBF00BAF5D9 /* BluetoothManager.swift in Sources */,
 				37F85F462119165000BAF5D9 /* Resource.swift in Sources */,
@@ -32098,6 +32102,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
 		};
@@ -32206,7 +32211,7 @@
 					"$(PROJECT_DIR)/iOS",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -32237,7 +32242,7 @@
 					"$(PROJECT_DIR)/iOS",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
