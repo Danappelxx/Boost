@@ -111,3 +111,6 @@ def toggle():
         return jsonify({"is_playing": not is_playing}), requests.codes.ok
     else:
         return jsonify(playpause_response.json()), playpause_response.status_code
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)
