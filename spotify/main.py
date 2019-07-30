@@ -6,10 +6,10 @@ import base64
 
 app = Flask(__name__)
 
-client_id = environ["CLIENT_ID"]
-client_secret = environ["CLIENT_SECRET"]
-encryption_secret = environ["ENCRYPTION_SECRET"]
-client_callback_url = environ["CLIENT_CALLBACK_URL"]
+client_id = environ["SPOTIFY_CLIENT_ID"]
+client_secret = environ["SPOTIFY_CLIENT_SECRET"]
+encryption_secret = environ["SPOTIFY_ENCRYPTION_SECRET"]
+client_callback_url = environ["SPOTIFY_CLIENT_CALLBACK_URL"]
 
 spotify_token_endpoint = "https://accounts.spotify.com/api/token"
 spotify_status_endpoint = "https://api.spotify.com/v1/me/player/currently-playing"
