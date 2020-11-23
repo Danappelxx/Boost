@@ -23,10 +23,10 @@ enum SpotifyResult<T> {
     case error(SpotifyError)
 
     var value: (value: T, code: Int)? {
-        guard case let .success(value) = self else {
+        guard case let .success(value, code) = self else {
             return nil
         }
-        return value
+        return (value: value, code: code)
     }
 
     var error: SpotifyError? {

@@ -21,7 +21,7 @@ public struct Notification {
     var body: String
     var sound: UNNotificationSound
 
-    init(identifier: String, title: String? = nil, body: String, sound: UNNotificationSound = .default()) {
+    init(identifier: String, title: String? = nil, body: String, sound: UNNotificationSound = .default) {
         self.identifier = identifier
         self.title = title
         self.body = body
@@ -30,7 +30,7 @@ public struct Notification {
 }
 
 public class Notifications {
-    public static var removeNotificationTaskId = UIBackgroundTaskInvalid
+    public static var removeNotificationTaskId = UIBackgroundTaskIdentifier.invalid
 
     private static var center: UNUserNotificationCenter {
         return UNUserNotificationCenter.current()
@@ -60,9 +60,9 @@ public class Notifications {
 
         let request = UNNotificationRequest(identifier: notification.identifier, content: content, trigger: nil)
 
-        if removeNotificationTaskId != UIBackgroundTaskInvalid {
-            UIApplication.shared.endBackgroundTask(removeNotificationTaskId)
-            removeNotificationTaskId = UIBackgroundTaskInvalid
+        if removeNotificationTaskId != UIBackgroundTaskIdentifier.invalid {
+            UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(removeNotificationTaskId.rawValue))
+            removeNotificationTaskId = UIBackgroundTaskIdentifier.invalid
         }
         removeAllDelivered()
 
@@ -72,15 +72,15 @@ public class Notifications {
             removeNotificationTaskId = UIApplication.shared.beginBackgroundTask(expirationHandler: {
                 print("[task expired] Removed \(notification)")
                 center.removeDeliveredNotifications(withIdentifiers: [notification.identifier])
-                UIApplication.shared.endBackgroundTask(removeNotificationTaskId)
-                removeNotificationTaskId = UIBackgroundTaskInvalid
+                UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(removeNotificationTaskId.rawValue))
+                removeNotificationTaskId = UIBackgroundTaskIdentifier.invalid
             })
 
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(5), execute: {
                 print("Removed \(notification)")
                 center.removeDeliveredNotifications(withIdentifiers: [notification.identifier])
-                UIApplication.shared.endBackgroundTask(removeNotificationTaskId)
-                removeNotificationTaskId = UIBackgroundTaskInvalid
+                UIApplication.shared.endBackgroundTask(convertToUIBackgroundTaskIdentifier(removeNotificationTaskId.rawValue))
+                removeNotificationTaskId = UIBackgroundTaskIdentifier.invalid
             })
         }
     }
@@ -97,4 +97,9 @@ public class Notifications {
             print("Added push notification request, error: \(error?.localizedDescription ?? "[]")")
         }
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToUIBackgroundTaskIdentifier(_ input: Int) -> UIBackgroundTaskIdentifier {
+	return UIBackgroundTaskIdentifier(rawValue: input)
 }

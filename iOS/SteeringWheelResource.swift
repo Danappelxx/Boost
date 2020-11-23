@@ -39,7 +39,7 @@ struct SteeringWheel: GenericResourceDescription {
         }
 
         var asData: Data {
-            return Data(bytes: [rawValue])
+            return Data([rawValue])
         }
 
         init(from data: Data) throws {

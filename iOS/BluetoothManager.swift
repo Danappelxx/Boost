@@ -135,6 +135,8 @@ extension BluetoothManager: CBCentralManagerDelegate {
         case .unauthorized: print("unauthorized")
         case .unknown: print("unknown")
         case .unsupported: print("unsupported")
+        @unknown default:
+            print("unknown")
         }
 
         guard central.state == .poweredOn else {

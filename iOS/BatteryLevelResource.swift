@@ -29,6 +29,6 @@ extension Double: DataConvertible {
         let value = UInt16(self * 100)
         let lower = value & 0xff
         let higher = value >> 8
-        return Data(bytes: [UInt8(lower), UInt8(higher)])
+        return Data([UInt8(lower), UInt8(higher)])
     }
 }
