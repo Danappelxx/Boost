@@ -19,9 +19,10 @@ protocol DataConvertible {
 
 enum DataResourceError: Error {
     case characteristicNotConnected
+    case peripheralNotAvailable
 }
 
-protocol DataResource: class {
+protocol DataResource: AnyObject {
     var serviceId: CBUUID { get }
     var characteristicId: CBUUID { get }
 
@@ -35,14 +36,20 @@ extension DataResource {
         guard let characteristic = characteristic else {
             throw DataResourceError.characteristicNotConnected
         }
-        characteristic.service.peripheral.writeValue(value, for: characteristic, type: .withResponse)
+        guard let peripheral = characteristic.service?.peripheral else {
+            throw DataResourceError.peripheralNotAvailable
+        }
+        peripheral.writeValue(value, for: characteristic, type: .withResponse)
     }
 
     func setNotificationsEnabled(_ value: Bool) throws {
         guard let characteristic = characteristic else {
             throw DataResourceError.characteristicNotConnected
         }
-        characteristic.service.peripheral.setNotifyValue(value, for: characteristic)
+        guard let peripheral = characteristic.service?.peripheral else {
+            throw DataResourceError.peripheralNotAvailable
+        }
+        peripheral.setNotifyValue(value, for: characteristic)
     }
 }
 

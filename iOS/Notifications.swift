@@ -6,15 +6,19 @@
 //  Copyright © 2019 Dan Appel. All rights reserved.
 //
 
+import UIKit
 import UserNotifications
 
 public struct Notification {
     public static let deviceConnected = Notification(identifier: "app.danapp.boost.deviceconnected", body: "Device connected")
     public static let foregroundRequiredToAuthenticateSpotify = Notification(identifier: "app.danapp.boost.authenticate", body: "Foreground app to authenticate with Spotify")
     public static let spotifyRenewingSession = Notification(identifier: "app.danapp.boost.renewing", body: "Renewing Spotify session")
+    public static let spotifyInitiatedSession = Notification(identifier: "app.danapp.boost.initiated", body: "Successfully initiated Spotify session")
     public static let spotifyRenewedSession = Notification(identifier: "app.danapp.boost.renewed", body: "Successfully renewed Spotify session")
     public static let spotifyPlayPause = Notification(identifier: "app.danapp.boost.playpause", body: "Play/Pause Spotify playback")
     public static let spotifySkip = Notification(identifier: "app.danapp.boost.skip", body: "Skip Spotify playback")
+    public static let spotifyJumpToBeginning = Notification(identifier: "app.danapp.boost.jumpbeginning", body: "Jump to Beginning Spotify playback")
+    public static let spotifyPrevious = Notification(identifier: "app.danapp.boost.previous", body: "Previous Spotify playback")
 
     var identifier: String
     var title: String?
@@ -40,6 +44,7 @@ public class Notifications {
         .deviceConnected,
         .foregroundRequiredToAuthenticateSpotify,
         .spotifyRenewingSession,
+        .spotifyInitiatedSession,
         .spotifyRenewedSession,
         .spotifyPlayPause,
         .spotifySkip,

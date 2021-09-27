@@ -34,11 +34,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("App opened with url: \(url)")
-        if SpotifyRemoteManager.shared.authCallback(url) {
-            return true
-        }
-        return false
+        SpotifyRemoteManager.shared.authCallback(app, open: url, options: options)
+        return true
     }
+
+    /*
+    func applicationWillResignActive(_ application: UIApplication) {
+         if (rootViewController.appRemote.isConnected) {
+             rootViewController.appRemote.disconnect()
+         }
+     }
+
+     func applicationDidBecomeActive(_ application: UIApplication) {
+         if let _ = rootViewController.appRemote.connectionParameters.accessToken {
+             rootViewController.appRemote.connect()
+         }
+     }
+     */
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         completionHandler()

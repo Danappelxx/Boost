@@ -8,6 +8,7 @@
 
 import SafariServices
 import UserNotifications
+import SpotifyiOS
 
 enum SpotifyError: Error {
     case notAuthenticated
@@ -37,7 +38,7 @@ enum SpotifyResult<T> {
     }
 }
 
-public class SpotifyRemoteManager {
+public class SpotifyRemoteManager: NSObject {
     public static let shared = SpotifyRemoteManager()
     private static let apiRootURL = "https://api.spotify.com/v1"
     private static let apiPlayerURL = apiRootURL + "/me/player"
@@ -49,87 +50,55 @@ public class SpotifyRemoteManager {
     private static let apiSeekURL = URL(string: apiPlayerURL + "/seek")!
     private static let apiToggleURL = URL(string: "https://boost-spotify.danapp.app/toggle")!
 
-    private let auth: SPTAuth = {
-        let auth = SPTAuth.defaultInstance()!
-        auth.clientID = "9a23191fb3f24dda88b0be476bb32a5e"
-        auth.redirectURL = URL(string: "appdanappboost://")!
-        auth.requestedScopes = ["user-read-playback-state", "user-modify-playback-state"]
-        auth.sessionUserDefaultsKey = "spotify_session"
+    private let scope: SPTScope = [.userReadPlaybackState, .userModifyPlaybackState]
+    private let configuration: SPTConfiguration = {
+        let auth = SPTConfiguration(clientID: "9a23191fb3f24dda88b0be476bb32a5e", redirectURL: URL(string: "appdanappboost://")!)
         auth.tokenSwapURL = URL(string: "https://boost-spotify.danapp.app/swap")
         auth.tokenRefreshURL = URL(string: "https://boost-spotify.danapp.app/refresh")
         return auth
     }()
 
-    private var authVC: SFSafariViewController?
+    private lazy var sessionManager: SPTSessionManager = SPTSessionManager(configuration: configuration, delegate: self)
 
     // callback true if was authenticated or is now authenticated
     // callback false if failed or requires app open to authenticate
     public func authenticateIfNeeded(callback: ((_ authenticated: Bool) -> ())? = nil) {
-        guard let session = auth.session else {
+        if sessionManager.session == nil {
+            // attempt to restore from cache
+            sessionManager.session = cachedSession()
+        }
+
+        guard let session = sessionManager.session else {
             beginAuthenticationFlow()
             callback?(false)
             return
         }
 
-        if session.isValid() {
-            print("Access token still valid")
-            callback?(true)
-        } else {
+        guard !session.isExpired else {
             print("Attempting to renew session")
             Notifications.send(.spotifyRenewingSession)
-            auth.renewSession(session) { (error, newSession) in
-                if newSession == nil {
-                    Notifications.error(message: "Failed to renew session")
-                    print("Failed to renew session", error ?? "[no error]")
-                    if (error as NSError?)?.domain == NSURLErrorDomain {
-                        print("Network error - do not attempt to authenticate in funky ways")
-                    } else {
-                        self.beginAuthenticationFlow()
-                    }
-                    callback?(false)
-                } else {
-                    Notifications.send(.spotifyRenewedSession)
-                    print("Successfully renewed session", error ?? "")
-                    callback?(true)
-                }
-            }
+            sessionManager.renewSession()
+            callback?(false)
+            return
         }
+
+        print("Access token still valid")
+        callback?(true)
     }
 
     private func beginAuthenticationFlow() {
-        print("Authenticating user through spotify site")
+        print("Authenticating user through spotify sdk")
         // ensure in foreground
         guard UIApplication.shared.applicationState == .active else {
             print("App in background, send notification alerting user!")
             return Notifications.send(.foregroundRequiredToAuthenticateSpotify)
         }
 
-        self.authVC = SFSafariViewController(url: self.auth.spotifyWebAuthenticationURL())
-        UIApplication.shared.delegate?.window??.rootViewController?.present(self.authVC!, animated: true, completion: nil)
+        sessionManager.initiateSession(with: scope, options: .clientOnly)
     }
 
-    public func authCallback(_ url: URL) -> Bool {
-        guard auth.canHandle(url) else {
-            // not spotify url
-            return false
-        }
-
-        print("Spotify auth callback opened")
-
-        auth.handleAuthCallback(withTriggeredAuthURL: url) { error, session in
-            defer {
-                self.authVC?.presentingViewController?.dismiss(animated: true, completion: nil)
-            }
-
-            guard let session = session else {
-                Notifications.error(message: "Failed to authenticate")
-                return print("failed to authenticate with error", error ?? "[no error]")
-            }
-
-            print("Successfully authenticated session", session)
-        }
-
-        return true
+    public func authCallback(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
+        sessionManager.application(application, open: url, options: options)
     }
 
     private func api(request: URLRequest, callback: @escaping (SpotifyResult<Data>) -> ()) {
@@ -161,6 +130,7 @@ public class SpotifyRemoteManager {
         api(request: request) { result in
             switch result {
             case let .error(error):
+                Notifications.error(message: "\(error)")
                 return callback(.error(error))
             case let .success(value: data, code: code):
                 let decoder = JSONDecoder()
@@ -180,13 +150,16 @@ public class SpotifyRemoteManager {
 
     private func api(request: URLRequest, callback: @escaping () -> ()) {
         api(request: request) { data in
+            if case let .error(error) = data {
+                Notifications.error(message: "\(error)")
+            }
             callback()
         }
     }
 
     private func authorized(request: URLRequest) -> URLRequest {
         var request = request
-        request.setValue("Bearer \(auth.session.accessToken!)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(sessionManager.session!.accessToken)", forHTTPHeaderField: "Authorization")
         return request
     }
 
@@ -202,6 +175,8 @@ public class SpotifyRemoteManager {
     }
 
     public func jumpToBeginning() {
+        Notifications.send(.spotifyJumpToBeginning)
+
         var components = URLComponents(url: SpotifyRemoteManager.apiSeekURL, resolvingAgainstBaseURL: false)!
         components.queryItems = [URLQueryItem(name: "position_ms", value: "0")]
         let url = components.url!
@@ -215,6 +190,8 @@ public class SpotifyRemoteManager {
     }
 
     public func previous() {
+        Notifications.send(.spotifyPrevious)
+
         var prevRequest = URLRequest(url: SpotifyRemoteManager.apiPrevURL)
         prevRequest.httpMethod = "POST"
 
@@ -261,5 +238,45 @@ public class SpotifyRemoteManager {
                 fatalError("Result should not be a success if status code is non-[200,204]")
             }
         }
+    }
+}
+
+extension SpotifyRemoteManager: SPTSessionManagerDelegate {
+    public func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
+        Notifications.send(.spotifyInitiatedSession)
+        cache(session: session)
+    }
+
+    public func sessionManager(manager: SPTSessionManager, didRenew session: SPTSession) {
+        Notifications.send(.spotifyRenewedSession)
+        cache(session: session)
+    }
+
+    public func sessionManager(manager: SPTSessionManager, didFailWith error: Error) {
+        Notifications.error(message: "\(error)")
+    }
+}
+
+extension SpotifyRemoteManager {
+
+    private static let sessionCacheKey = "app.danapp.boost.spotify.session"
+
+    private func cache(session: SPTSession) {
+        do {
+            let sessionData = try NSKeyedArchiver.archivedData(withRootObject: session, requiringSecureCoding: false)
+            UserDefaults.standard.set(sessionData, forKey: Self.sessionCacheKey)
+        } catch {
+            Notifications.error(message: "Failed to archive session")
+        }
+    }
+
+    private func cachedSession() -> SPTSession? {
+        guard let sessionData = UserDefaults.standard.data(forKey: Self.sessionCacheKey) else {
+            return nil
+        }
+        guard let session = try? NSKeyedUnarchiver.unarchivedObject(ofClass: SPTSession.self, from: sessionData) else {
+            return nil
+        }
+        return session
     }
 }
