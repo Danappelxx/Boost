@@ -13,6 +13,13 @@ SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(MANUAL);
 BLE_SETUP(DISABLED);
 
+class AMSService: public BLE::Service {
+public:
+    AMSService()
+        : Service(BLE::UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC")) {
+        }
+};
+
 class LEDBlinkerService: public BLE::Service {
 public:
     class BlinkCharacteristic: public BLE::MutableCharacteristic {
@@ -107,6 +114,7 @@ std::shared_ptr<BatteryManager> batteryManager(std::make_shared<BatteryManager>(
 std::unique_ptr<BLE::Manager> bluetooth;
 std::shared_ptr<CANService> canService;
 std::shared_ptr<LEDBlinkerService> ledBlinkerService;
+std::shared_ptr<AMSService> amsService;
 
 void setup() {
     Serial.begin();
@@ -132,6 +140,11 @@ void setup() {
 
     canService = std::make_shared<CANService>();
     bluetooth->addService(canService);
+
+    Serial.println("About to add AMSService");
+    amsService = std::make_shared<AMSService>();
+    bluetooth->addService(amsService);
+    Serial.println("Added AMSService");
 
     Serial.println("About to begin advertising");
     bluetooth->startAdvertising();

@@ -54,15 +54,25 @@ static advParams_t advertisingParameters = {
     .filter_policy = filterPolicy
 };
 //TODO: refactor for this to not be static (should include current device information)
-static std::vector<uint8_t> advertisementData = {
-    0x02, // len
-    BLE_GAP_AD_TYPE_FLAGS, // advertising type flag
-    BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE, // never stops advertising, low energy only
-    0x11, // len
-    BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE, // just one service, no room for more
-    // TODO: not hardcode this
-    0x16, 0x88, 0x7F, 0xD0, 0x6A, 0x40, 0x75, 0xB5, 0xD6, 0x40, 0x49, 0xEA, 0x1D, 0x8B, 0x7E, 0x9A // CAN service uuid
-};
+std::vector<uint8_t> makeAdvertisementData() {
+    std::vector<uint8_t> vec = {
+        0x02, // len
+        BLE_GAP_AD_TYPE_FLAGS, // advertising type flag
+        BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE, // never stops advertising, low energy only
+        0x11, // len
+        0x15, // "List of 128-bit Service Solicitation UUIDs"
+        //BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE, // just one service, no room for more
+        // TODO: not hardcode this
+        // 0x16, 0x88, 0x7F, 0xD0, 0x6A, 0x40, 0x75, 0xB5, 0xD6, 0x40, 0x49, 0xEA, 0x1D, 0x8B, 0x7E, 0x9A // CAN service uuid
+    };
+    std::vector<uint8_t> vec2 = BLE::UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC").data;
+    // doesn't render properly without this...
+    for (int i = vec2.size() - 1; i >= 0; i--) {
+        vec.push_back(vec2[i]);
+    }
+    return vec;
+}
+static std::vector<uint8_t> advertisementData = makeAdvertisementData();
 static std::vector<uint8_t> scanResponseData = {
     0x06,
     BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
