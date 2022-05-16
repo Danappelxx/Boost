@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BLE.h"
+#include "UUID.h"
 #include <memory>
 #include <string>
 

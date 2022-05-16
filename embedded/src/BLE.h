@@ -2,30 +2,13 @@
 
 #define PLATFORM_ID 88
 #include "application.h"
+#include "UUID.h"
 #include <map>
 #include <memory>
 #include <vector>
 #include <string>
 
 namespace BLE {
-    struct UUID {
-        // 16 or 128 bit uuid type
-        UUID(uint16_t data);
-        UUID(const uint8_t (&data)[16]);
-        UUID(const std::string string);
-
-        bool is16() const;
-        bool is128() const;
-
-        uint16_t data16() const;
-        const uint8_t* data128() const;
-
-        // len 16 = 128 bits
-        // len 2 = 16 bits
-        // cheating here but btstack doesn't mark anything as const ugh
-        mutable std::vector<uint8_t> data;
-    };
-
     enum class Error: uint8_t {
         OK = 0,
         InvalidHandle = ATT_ERROR_INVALID_HANDLE,
@@ -248,8 +231,12 @@ namespace BLE {
         int onWriteCallback(uint16_t handle, uint8_t* buffer, uint16_t bufferSize);
         void onConnectedCallback(BLEStatus_t status, uint16_t handle);
         void onDisconnectedCallback(uint16_t handle);
+        void onServiceDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_service_t *service);
+        void onCharacteristicDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic);
 
         std::vector<std::shared_ptr<Service>> services;
+        // FIXME: apply UUID filter to this
+        std::vector<gatt_client_service_t> discoveredServices;
         std::map<uint16_t, std::shared_ptr<Characteristic>> characteristicHandles;
         std::map<uint16_t, std::shared_ptr<Descriptor>> descriptorHandles;
 

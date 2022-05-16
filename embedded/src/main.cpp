@@ -13,12 +13,28 @@ SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(MANUAL);
 BLE_SETUP(DISABLED);
 
-class AMSService: public BLE::Service {
-public:
-    AMSService()
-        : Service(BLE::UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC")) {
-        }
-};
+// class AMSService: public BLE::Service {
+// public:
+//     class RemoteCommand: public BLE::NotifyCharacteristic {
+//     public:
+//         RemoteCommand(): NotifyCharacteristic(
+//             UUID("9B3C81D8-57B1-4A8A-B8DF-0E56F7CA51C2"),
+//             // len = 13 bytes
+//             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+//             // WRITE_NO_ERSPONSE | NOTIFY
+//             BLE::Properties::Write) {}
+
+//     };
+
+//     AMSService()
+//         : Service(UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC")) {
+//             remoteCommand = std::make_shared<RemoteCommand>();
+
+//             addCharacteristic(remoteCommand);
+//         }
+
+//     std::shared_ptr<RemoteCommand> remoteCommand;
+// };
 
 class LEDBlinkerService: public BLE::Service {
 public:
@@ -30,7 +46,7 @@ public:
         };
 
         BlinkCharacteristic(): MutableCharacteristic(
-            BLE::UUID("6962CDC6-DCB1-465B-8AA4-23491CAF4840"),
+            UUID("6962CDC6-DCB1-465B-8AA4-23491CAF4840"),
             { static_cast<uint8_t>(State::Off) }) {
             pinMode(D7, OUTPUT);
         }
@@ -50,7 +66,7 @@ public:
     };
 
     LEDBlinkerService()
-        : Service(BLE::UUID("70DA7AB7-4FE2-4614-B092-2E8EC60290BB")) {
+        : Service(UUID("70DA7AB7-4FE2-4614-B092-2E8EC60290BB")) {
         blinkCharacteristic = std::make_shared<BlinkCharacteristic>();
 
         addCharacteristic(blinkCharacteristic);
@@ -63,7 +79,7 @@ class CANService: public BLE::Service {
     class SteeringWheelCharacteristic: public BLE::IndicateCharacteristic {
     public:
         SteeringWheelCharacteristic()
-            : IndicateCharacteristic(BLE::UUID("BBBEF1D2-E1E6-4189-BE0B-C00D6D3CC6BB"), { 0 }) {}
+            : IndicateCharacteristic(UUID("BBBEF1D2-E1E6-4189-BE0B-C00D6D3CC6BB"), { 0 }) {}
 
         void newState(uint8_t state) {
             setValue({ state });
@@ -73,7 +89,7 @@ class CANService: public BLE::Service {
     class BatteryCharacteristic: public BLE::IndicateCharacteristic {
     public:
         BatteryCharacteristic()
-            : IndicateCharacteristic(BLE::UUID("63F13CE9-63B0-4ED3-8EBA-27441DDFC18E"), { 0, 0 }) {}
+            : IndicateCharacteristic(UUID("63F13CE9-63B0-4ED3-8EBA-27441DDFC18E"), { 0, 0 }) {}
 
         void newState(float state) {
             if (!readyToSend())
@@ -97,7 +113,7 @@ class CANService: public BLE::Service {
     };
 
 public:
-    CANService() : Service(BLE::UUID("9A7E8B1D-EA49-40D6-B575-406AD07F8816")) {
+    CANService() : Service(UUID("9A7E8B1D-EA49-40D6-B575-406AD07F8816")) {
         steeringWheelCharacteristic = std::make_shared<SteeringWheelCharacteristic>();
         batteryCharacteristic = std::make_shared<BatteryCharacteristic>();
 
@@ -114,7 +130,7 @@ std::shared_ptr<BatteryManager> batteryManager(std::make_shared<BatteryManager>(
 std::unique_ptr<BLE::Manager> bluetooth;
 std::shared_ptr<CANService> canService;
 std::shared_ptr<LEDBlinkerService> ledBlinkerService;
-std::shared_ptr<AMSService> amsService;
+// std::shared_ptr<AMSService> amsService;
 
 void setup() {
     Serial.begin();
@@ -141,10 +157,10 @@ void setup() {
     canService = std::make_shared<CANService>();
     bluetooth->addService(canService);
 
-    Serial.println("About to add AMSService");
-    amsService = std::make_shared<AMSService>();
-    bluetooth->addService(amsService);
-    Serial.println("Added AMSService");
+    // Serial.println("About to add AMSService");
+    // amsService = std::make_shared<AMSService>();
+    // bluetooth->addService(amsService);
+    // Serial.println("Added AMSService");
 
     Serial.println("About to begin advertising");
     bluetooth->startAdvertising();

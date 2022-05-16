@@ -2,80 +2,6 @@
 #include <assert.h>
 #include <sstream>
 
-//MARK: UUID
-// 16 bit
-BLE::UUID::UUID(uint16_t data) {
-    this->data = { LOW_BYTE(data), HIGH_BYTE(data) };
-}
-
-// 128 bit
-BLE::UUID::UUID(const uint8_t (&data)[16]) {
-    this->data = std::vector<uint8_t>(data, data + 16);
-}
-
-// converts a single hex char to a number (0 - 15)
-// https://github.com/graeme-hill/crossguid/blob/master/src/guid.cpp#L161
-uint8_t hexDigitToChar(char ch) {
-    // 0-9
-    if (ch > 47 && ch < 58)
-        return ch - 48;
-
-    // a-f
-    if (ch > 96 && ch < 103)
-        return ch - 87;
-
-    // A-F
-    if (ch > 64 && ch < 71)
-        return ch - 55;
-
-    return 0;
-}
-
-// 128 bit
-BLE::UUID::UUID(const std::string string) {
-    std::vector<uint8_t> data;
-
-    // char 1 is upper bytes, char 2 is lower bytes
-    char char1;
-    char char2;
-    bool wantsCharOne = true;
-    for (char c : string) {
-        if (c == '-')
-            continue;
-
-        if (wantsCharOne)
-            char1 = c;
-        else {
-            char2 = c;
-
-            uint8_t combined = hexDigitToChar(char1) * 16 + hexDigitToChar(char2);
-            data.push_back(combined);
-        }
-
-        wantsCharOne = !wantsCharOne;
-    }
-    this->data = data;
-}
-
-bool BLE::UUID::is16() const {
-    return data.size() == 2;
-}
-
-bool BLE::UUID::is128() const {
-    // lol
-    return !is16();
-}
-
-uint16_t BLE::UUID::data16() const {
-    uint8_t byte1 = data[0];
-    uint8_t byte2 = data[1];
-    return (byte2 << 8) | byte1;
-}
-
-const uint8_t* BLE::UUID::data128() const {
-    return data.data();
-}
-
 //MARK: Characteristic
 BLE::Characteristic::Characteristic(const UUID& type, const Properties& properties): type(type), properties(properties) {
     if (isNotify()) {
@@ -156,6 +82,8 @@ static uint16_t (BLE::Manager::*_onReadCallback)(uint16_t, uint8_t*, uint16_t) =
 static int (BLE::Manager::*_onWriteCallback)(uint16_t, uint8_t*, uint16_t) = nullptr;
 static void (BLE::Manager::*_onConnectedCallback)(BLEStatus_t, uint16_t) = nullptr;
 static void (BLE::Manager::*_onDisconnectedCallback)(uint16_t) = nullptr;
+static void (BLE::Manager::*_onServiceDiscoveredCallback)(BLEStatus_t, uint16_t, gatt_client_service_t*) = nullptr;
+static void (BLE::Manager::*_onCharacteristicDiscoveredCallback)(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic) = nullptr;
 
 uint16_t _onReadCallbackWrapper(uint16_t handle, uint8_t* buffer, uint16_t bufferSize) {
     return (_manager->*_onReadCallback)(handle, buffer, bufferSize);
@@ -173,23 +101,37 @@ void _onDisconnectedCallbackWrapper(uint16_t handle) {
     return (_manager->*_onDisconnectedCallback)(handle);
 }
 
+void _onServiceDiscoveredCallbackWrapper(BLEStatus_t status, uint16_t handle, gatt_client_service_t *service) {
+    return (_manager->*_onServiceDiscoveredCallback)(status, handle, service);
+}
+
+void _onCharacteristicDiscoveredCallbackWrapper(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic) {
+    return (_manager->*_onCharacteristicDiscoveredCallback)(status, handle, characteristic);
+}
+
 void _registerCallbacks(
     BLE::Manager* manager,
     uint16_t (BLE::Manager::*onReadCallback)(uint16_t, uint8_t*, uint16_t),
     int (BLE::Manager::*onWriteCallback)(uint16_t, uint8_t*, uint16_t),
     void (BLE::Manager::*onConnectedCallback)(BLEStatus_t, uint16_t),
-    void (BLE::Manager::*onDisconnectedCallback)(uint16_t)) {
+    void (BLE::Manager::*onDisconnectedCallback)(uint16_t),
+    void (BLE::Manager::*onServiceDiscoveredCallback)(BLEStatus_t, uint16_t, gatt_client_service_t*),
+    void (BLE::Manager::*onCharacteristicDiscoveredCallback)(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic)) {
 
     _manager = manager;
     _onReadCallback = onReadCallback;
     _onWriteCallback = onWriteCallback;
     _onConnectedCallback = onConnectedCallback;
     _onDisconnectedCallback = onDisconnectedCallback;
+    _onServiceDiscoveredCallback = onServiceDiscoveredCallback;
+    _onCharacteristicDiscoveredCallback = onCharacteristicDiscoveredCallback;
 
     ble.onDataReadCallback(_onReadCallbackWrapper);
     ble.onDataWriteCallback(_onWriteCallbackWrapper);
     ble.onConnectedCallback(_onConnectedCallbackWrapper);
     ble.onDisconnectedCallback(_onDisconnectedCallbackWrapper);
+    ble.onServiceDiscoveredCallback(_onServiceDiscoveredCallbackWrapper);
+    ble.onCharacteristicDiscoveredCallback(_onCharacteristicDiscoveredCallbackWrapper);
 }
 
 //MARK: Manager
@@ -205,7 +147,9 @@ BLE::Manager::Manager(): connected(false) {
        &BLE::Manager::onReadCallback,
        &BLE::Manager::onWriteCallback,
        &BLE::Manager::onConnectedCallback,
-       &BLE::Manager::onDisconnectedCallback);
+       &BLE::Manager::onDisconnectedCallback,
+       &BLE::Manager::onServiceDiscoveredCallback,
+       &BLE::Manager::onCharacteristicDiscoveredCallback);
 }
 
 BLE::Manager::~Manager() {
@@ -317,6 +261,33 @@ int BLE::Manager::onWriteCallback(uint16_t handle, uint8_t* buffer, uint16_t buf
     return static_cast<uint8_t>(Error::UnlikelyError);
 }
 
+void BLE::Manager::onServiceDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_service_t *service) {
+    Serial.printlnf("Discover service callback called, status: %d, handle: %d", status, handle);
+    if (status == BLE_STATUS_OK) {
+        Serial.printlnf("The UUID of the service discovered: [start group: %d, end group: %d] [uuid16: %d] [uuid128: %s]", service->start_group_handle, service->end_group_handle, service->uuid16, UUID(service->uuid128).toString().c_str());
+        discoveredServices.push_back(*service);
+    } else if (status == BLE_STATUS_DONE) {
+        Serial.println("Discover services completed. In summary, discovered: (looking for 89d3502b-0f36-433a-8ef4-c502ad55f8dc)");
+        for (auto service: discoveredServices) {
+            Serial.printlnf("   %s", UUID(service.uuid128).toString().c_str());
+
+            // TODO: don't hardcode, make it an instance variable 'discoverTargetUUIDs' or sm
+            if (UUID(service.uuid128) == UUID("89d3502b-0f36-433a-8ef4-c502ad55f8dc")) {
+                ble.discoverCharacteristics(handle, &service);
+            }
+        }
+    }
+}
+
+void BLE::Manager::onCharacteristicDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic) {
+    Serial.printlnf("Discover characteristic callback called, status: %d, handle: %d", status, handle);
+    if (status == BLE_STATUS_OK) {
+        Serial.printlnf("The UUID of the characteristic discovered: [uuid16: %d] [uuid128: %s]", characteristic->uuid16, UUID(characteristic->uuid128).toString().c_str());
+    } else if (status == BLE_STATUS_DONE) {
+        Serial.println("Discover characteristics completed");
+    }
+}
+
 void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
     switch (status) {
         case BLE_STATUS_OK:
@@ -326,6 +297,8 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
             if (std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic = this->serviceChangedCharacteristic) {
                 serviceChangedCharacteristic->sendIndicate();
             }
+
+            ble.discoverPrimaryServices(handle);
 
             break;
         case BLE_STATUS_DONE:

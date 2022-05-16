@@ -65,7 +65,7 @@ std::vector<uint8_t> makeAdvertisementData() {
         // TODO: not hardcode this
         // 0x16, 0x88, 0x7F, 0xD0, 0x6A, 0x40, 0x75, 0xB5, 0xD6, 0x40, 0x49, 0xEA, 0x1D, 0x8B, 0x7E, 0x9A // CAN service uuid
     };
-    std::vector<uint8_t> vec2 = BLE::UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC").data;
+    std::vector<uint8_t> vec2 = UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC").data;
     // doesn't render properly without this...
     for (int i = vec2.size() - 1; i >= 0; i--) {
         vec.push_back(vec2[i]);
