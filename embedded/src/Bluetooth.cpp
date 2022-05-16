@@ -102,8 +102,8 @@ BLE::GattService::GattService(): Service(UUID(BLE_UUID_GATT)) {
     addCharacteristic(this->serviceChangedCharacteristic);
 }
 
-std::unique_ptr<BLE::Manager> BLE::bluetooth() {
-    std::unique_ptr<Manager> manager(new Manager);
+std::shared_ptr<BLE::Manager> BLE::bluetooth() {
+    auto manager = std::make_shared<Manager>();
 
     manager->setAdvertisingParameters(&advertisingParameters);
     manager->setAdvertisementData(advertisementData);

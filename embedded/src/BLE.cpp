@@ -1,6 +1,7 @@
 #include "BLE.h"
 #include <assert.h>
 #include <sstream>
+#include "sm.h"
 
 //MARK: Characteristic
 BLE::Characteristic::Characteristic(const UUID& type, const Properties& properties): type(type), properties(properties) {
@@ -16,9 +17,14 @@ BLE::Characteristic::Characteristic(const UUID& type, const Properties& properti
     }
 }
 
+void BLE::Characteristic::postSetup() {
+    for (auto descriptor: descriptors) {
+        descriptor->characteristic = shared_from_this();
+    }
+}
+
 void BLE::Characteristic::addDescriptor(std::shared_ptr<Descriptor> descriptor) {
     descriptors.push_back(descriptor);
-    descriptor->characteristic = shared_from_this();
 }
 
 void BLE::IndicateCharacteristic::sendIndicate() {
@@ -68,8 +74,50 @@ void BLE::NotifyCharacteristic::sendNotify() {
     ble.sendNotify(handle, const_cast<uint8_t*>(value.data()), value.size());
 }
 
+// MARK: GATT Characteristic
+int BLE::GATTCharacteristic::tryWriteNoResponse(std::vector<uint8_t> data) {
+    if (!isDiscovered())
+        return -101;
+
+    std::shared_ptr<GATTService> service = this->service.lock();
+    if (!service)
+        return -102;
+    std::shared_ptr<Manager> manager = service->manager.lock();
+    if (!manager)
+        return -103;
+
+    auto connectionHandle = manager->connectionHandle;
+    auto valueHandle = this->characteristic.value_handle;
+
+    Serial.printlnf("MESSAGE size: %d, first byte: %d", data.size(), data[0]);
+    return ble.writeValueWithoutResponse(connectionHandle, valueHandle, data.size(), const_cast<uint8_t*>(data.data()));
+}
+
+int BLE::GATTCharacteristic::tryRead() {
+    if (!isDiscovered())
+        return -101;
+
+    std::shared_ptr<GATTService> service = this->service.lock();
+    if (!service)
+        return -102;
+    std::shared_ptr<Manager> manager = service->manager.lock();
+    if (!manager)
+        return -103;
+
+    auto connectionHandle = manager->connectionHandle;
+    auto valueHandle = this->characteristic.value_handle;
+
+    return ble.readValue(connectionHandle, valueHandle);
+}
+
 //MARK: Service
 BLE::Service::Service(UUID type) : type(type) {
+}
+
+void BLE::Service::postSetup() {
+    for (auto characteristic: characteristics) {
+        characteristic->postSetup();
+    }
 }
 
 void BLE::Service::addCharacteristic(std::shared_ptr<Characteristic> characteristic) {
@@ -109,6 +157,35 @@ void _onCharacteristicDiscoveredCallbackWrapper(BLEStatus_t status, uint16_t han
     return (_manager->*_onCharacteristicDiscoveredCallback)(status, handle, characteristic);
 }
 
+void _onGattCharacteristicReadCallbackWrapper(BLEStatus_t status, uint16_t conn_handle, uint16_t value_handle, uint8_t *value, uint16_t length) {
+    // TODO: use _manager->* pattern as above
+    uint8_t index;
+    if (status == BLE_STATUS_OK) {
+        Serial.println(" ");
+        Serial.println("Reads characteristic value successfully");
+
+        Serial.print("Characteristic value attribute handle: ");
+        Serial.println(value_handle, HEX);
+
+        Serial.print("Characteristic value : ");
+        for (index = 0; index < length; index++) {
+            Serial.print(value[index], HEX);
+            Serial.print(" ");
+        }
+        Serial.println(" ");
+    } else if (status != BLE_STATUS_DONE) {
+        if (status == BLE_STATUS_CONNECTION_TIMEOUT) {
+            Serial.printlnf("Reads characteristic value failed, timeout (%d).", status);
+        } else if (status == BLE_STATUS_CONNECTION_ERROR) {
+            Serial.printlnf("Reads characteristic value failed, connection error (%d).", status);
+        } else if (status == BLE_STATUS_OTHER_ERROR) {
+            Serial.printlnf("Reads characteristic value failed, other error... (%d).", status);
+        } else {
+            Serial.printlnf("Reads characteristic value failed, [???] error (%d).", status);
+        }
+    }
+}
+
 void _registerCallbacks(
     BLE::Manager* manager,
     uint16_t (BLE::Manager::*onReadCallback)(uint16_t, uint8_t*, uint16_t),
@@ -132,6 +209,7 @@ void _registerCallbacks(
     ble.onDisconnectedCallback(_onDisconnectedCallbackWrapper);
     ble.onServiceDiscoveredCallback(_onServiceDiscoveredCallbackWrapper);
     ble.onCharacteristicDiscoveredCallback(_onCharacteristicDiscoveredCallbackWrapper);
+    ble.onGattCharacteristicReadCallback(_onGattCharacteristicReadCallbackWrapper);
 }
 
 //MARK: Manager
@@ -154,6 +232,16 @@ BLE::Manager::Manager(): connected(false) {
 
 BLE::Manager::~Manager() {
     ble.deInit();
+}
+
+void BLE::Manager::finishedSetup() {
+    for (auto gattClientService: gattClientServices) {
+        gattClientService->manager = shared_from_this();
+        gattClientService->postSetup();
+    }
+    for (auto service: services) {
+        service->postSetup();
+    }
 }
 
 void BLE::Manager::addService(std::shared_ptr<Service> service) {
@@ -319,6 +407,7 @@ void BLE::Manager::onConnectedCallback(BLEStatus_t status, uint16_t handle) {
         case BLE_STATUS_OK:
             Serial.printlnf("Successfully connected to device! Handle: %d", handle);
             connected = true;
+            connectionHandle = handle;
 
             if (std::shared_ptr<IndicateCharacteristic> serviceChangedCharacteristic = this->serviceChangedCharacteristic) {
                 serviceChangedCharacteristic->sendIndicate();

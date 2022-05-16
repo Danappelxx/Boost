@@ -101,6 +101,7 @@ namespace BLE {
 
     public:
         Characteristic(const UUID& type, const Properties& properties);
+        void postSetup();
 
         void addDescriptor(std::shared_ptr<Descriptor> descriptor);
 
@@ -191,6 +192,8 @@ namespace BLE {
     class Service {
     public:
         Service(UUID type);
+        void postSetup();
+
         void addCharacteristic(std::shared_ptr<Characteristic> characteristic);
 
         const UUID& getType() const { return type; }
@@ -203,10 +206,13 @@ namespace BLE {
         //std::vector<Service> includedServices;
     };
 
+    class GATTService;
     class GATTCharacteristic {
         friend class Manager;
     public:
         GATTCharacteristic(UUID type): type(type) {}
+
+        std::weak_ptr<GATTService> service;
 
         const UUID& getType() const { return type; }
 
@@ -216,9 +222,10 @@ namespace BLE {
             this->discovered = true;
         }
 
-        // TODO: implement all of these (just write for now)
+        // TODO: implement all of these
         // read, write, writeNoResponse, onIndicate, onNotify, onReadCompleted, onWriteCompleted, etc.
-        int tryWrite(std::vector<uint8_t> data);
+        int tryWriteNoResponse(std::vector<uint8_t> data);
+        int tryRead();
 
     protected:
         UUID type;
@@ -226,13 +233,22 @@ namespace BLE {
         gatt_client_characteristic_t characteristic;
     };
 
-    class GATTService {
+    class Manager;
+    class GATTService: public std::enable_shared_from_this<GATTService> {
         friend class Manager;
     public:
         GATTService(UUID type): type(type) {}
 
+        std::weak_ptr<Manager> manager;
+
         void addCharacteristic(std::shared_ptr<GATTCharacteristic> characteristic) {
             characteristics.push_back(characteristic);
+        }
+
+        void postSetup() {
+            for (auto characteristic: characteristics) {
+                characteristic->service = shared_from_this();
+            }
         }
 
         void discover(gatt_client_service_t service) {
@@ -243,6 +259,7 @@ namespace BLE {
         bool isDiscovered() const { return discovered; }
         const UUID& getType() const { return type; }
         const std::vector<std::shared_ptr<GATTCharacteristic>>& getCharacteristics() const { return characteristics; }
+
     private:
         UUID type;
         std::vector<std::shared_ptr<GATTCharacteristic>> characteristics;
@@ -250,10 +267,14 @@ namespace BLE {
         gatt_client_service_t service;
     };
 
-    class Manager {
+    class Manager: public std::enable_shared_from_this<Manager> {
+        // needs access to connectionHandle (hacky)
+        friend class GATTCharacteristic;
     public:
         Manager();
         ~Manager();
+
+        void finishedSetup();
 
         void addService(std::shared_ptr<Service> service);
         void addGATTClientService(std::shared_ptr<GATTService> service);
@@ -289,5 +310,6 @@ namespace BLE {
         std::vector<std::shared_ptr<GATTService>> gattClientServices;
 
         bool connected;
+        uint16_t connectionHandle;
     };
 }

@@ -17,8 +17,29 @@ class AMSService: public BLE::GATTService {
 public:
     class RemoteCommand: public BLE::GATTCharacteristic {
     public:
+        enum class Command: uint8_t {
+            Play = 0,
+            Pause = 1,
+            TogglePlayPause = 2,
+            NextTrack = 3,
+            PreviousTrack = 4,
+            VolumeUp = 5,
+            VolumeDown = 6,
+            AdvanceRepeatMode = 7,
+            AdvanceShuffleMode = 8,
+            SkipForward = 9,
+            SkipBackward = 10,
+            LikeTrack = 11,
+            DislikeTrack = 12,
+            BookmarkTrack = 13
+        };
+
         RemoteCommand(): GATTCharacteristic(
             UUID("9B3C81D8-57B1-4A8A-B8DF-0E56F7CA51C2")) {}
+
+        int sendCommand(Command command) {
+            return tryWriteNoResponse({ static_cast<uint8_t>(command) });
+        }
     };
 
     AMSService()
@@ -122,7 +143,7 @@ public:
 
 CANChannel can(CAN_D1_D2);
 std::shared_ptr<BatteryManager> batteryManager(std::make_shared<BatteryManager>());
-std::unique_ptr<BLE::Manager> bluetooth;
+std::shared_ptr<BLE::Manager> bluetooth;
 std::shared_ptr<CANService> canService;
 std::shared_ptr<LEDBlinkerService> ledBlinkerService;
 std::shared_ptr<AMSService> amsService;
@@ -155,12 +176,16 @@ void setup() {
     amsService = std::make_shared<AMSService>();
     bluetooth->addGATTClientService(amsService);
 
+    bluetooth->finishedSetup();
+
     Serial.println("About to begin advertising");
     bluetooth->startAdvertising();
     Serial.println("Began advertising!");
 
     can.begin(33333);
 }
+
+int loopDelay = 1;
 
 void loop() {
 
@@ -178,6 +203,16 @@ void loop() {
             batteryManager->sleepIfLowBattery();
 
         return;
+    } else {
+        Serial.println("Sleeping for a sec");
+        if (loopDelay % 10 == 0) {
+            auto readResult = amsService->remoteCommand->tryRead();
+            Serial.printlnf("Result of read: %d", readResult);
+            delay(2000);
+            Serial.println("Sending [TogglePlayPause] command");
+            auto result = amsService->remoteCommand->sendCommand(AMSService::RemoteCommand::Command::TogglePlayPause);
+            Serial.printlnf("Result of send command: %d", result);
+        }
     }
 
     canService->batteryCharacteristic->newState(batteryManager->readBattery());
@@ -190,6 +225,16 @@ void loop() {
             // steering wheel button is fourth byte
             uint8_t value = message.data[3];
             canService->steeringWheelCharacteristic->newState(value);
+
+            if (value == 0x03) {
+                // right upper button
+                auto result = amsService->remoteCommand->sendCommand(AMSService::RemoteCommand::Command::NextTrack);
+                Serial.printlnf("Result of send command: %d", result);
+            } else if (value == 0x04) {
+                // right lower button
+                auto result = amsService->remoteCommand->sendCommand(AMSService::RemoteCommand::Command::TogglePlayPause);
+                Serial.printlnf("Result of send command: %d", result);
+            }
         }
     }
 }
