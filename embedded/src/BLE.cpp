@@ -215,6 +215,10 @@ void BLE::Manager::addService(std::shared_ptr<Service> service) {
     }
 }
 
+void BLE::Manager::addGATTClientService(std::shared_ptr<GATTService> service) {
+    gattClientServices.push_back(service);
+}
+
 uint16_t BLE::Manager::onReadCallback(uint16_t handle, uint8_t* buffer, uint16_t bufferSize) {
     std::shared_ptr<Characteristic> characteristic = characteristicHandles[handle];
     if (characteristic) {
@@ -264,17 +268,21 @@ int BLE::Manager::onWriteCallback(uint16_t handle, uint8_t* buffer, uint16_t buf
 void BLE::Manager::onServiceDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_service_t *service) {
     Serial.printlnf("Discover service callback called, status: %d, handle: %d", status, handle);
     if (status == BLE_STATUS_OK) {
-        Serial.printlnf("The UUID of the service discovered: [start group: %d, end group: %d] [uuid16: %d] [uuid128: %s]", service->start_group_handle, service->end_group_handle, service->uuid16, UUID(service->uuid128).toString().c_str());
-        discoveredServices.push_back(*service);
-    } else if (status == BLE_STATUS_DONE) {
-        Serial.println("Discover services completed. In summary, discovered: (looking for 89d3502b-0f36-433a-8ef4-c502ad55f8dc)");
-        for (auto service: discoveredServices) {
-            Serial.printlnf("   %s", UUID(service.uuid128).toString().c_str());
+        Serial.printlnf("The UUID of the service discovered: [start group: %d, end group: %d] [uuid: %s]", service->start_group_handle, service->end_group_handle, UUID(service->uuid128).toString().c_str());
 
-            // TODO: don't hardcode, make it an instance variable 'discoverTargetUUIDs' or sm
-            if (UUID(service.uuid128) == UUID("89d3502b-0f36-433a-8ef4-c502ad55f8dc")) {
-                ble.discoverCharacteristics(handle, &service);
-            }
+        for (auto gattService: gattClientServices) {
+            gattService->discover(*service);
+        }
+
+    } else if (status == BLE_STATUS_DONE) {
+        Serial.println("Discover services completed. From the list of services we were looking for, found:");
+        for (auto service: gattClientServices) {
+            if (!service->isDiscovered())
+                continue;
+
+            Serial.printlnf("   %s", service->getType().toString().c_str());
+
+            ble.discoverCharacteristics(handle, &(service->service));
         }
     }
 }
@@ -282,9 +290,27 @@ void BLE::Manager::onServiceDiscoveredCallback(BLEStatus_t status, uint16_t hand
 void BLE::Manager::onCharacteristicDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic) {
     Serial.printlnf("Discover characteristic callback called, status: %d, handle: %d", status, handle);
     if (status == BLE_STATUS_OK) {
-        Serial.printlnf("The UUID of the characteristic discovered: [uuid16: %d] [uuid128: %s]", characteristic->uuid16, UUID(characteristic->uuid128).toString().c_str());
+        Serial.printlnf("The UUID of the characteristic discovered: [uuid: %s]", UUID(characteristic->uuid128).toString().c_str());
+
+        for (auto gattService: gattClientServices) {
+            for (auto gattCharacteristic: gattService->getCharacteristics()) {
+                gattCharacteristic->discover(*characteristic);
+            }
+        }
     } else if (status == BLE_STATUS_DONE) {
-        Serial.println("Discover characteristics completed");
+        Serial.println("Discover characteristics completed. From the list of characteristics we were looking for, found:");
+
+        for (auto gattService: gattClientServices) {
+            if (!gattService->isDiscovered())
+                continue;
+
+            for (auto gattCharacteristic: gattService->getCharacteristics()) {
+                if (!gattCharacteristic->isDiscovered())
+                    continue;
+
+                Serial.printlnf("   %s", gattCharacteristic->getType().toString().c_str());
+            }
+        }
     }
 }
 

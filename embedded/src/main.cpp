@@ -13,28 +13,23 @@ SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(MANUAL);
 BLE_SETUP(DISABLED);
 
-// class AMSService: public BLE::Service {
-// public:
-//     class RemoteCommand: public BLE::NotifyCharacteristic {
-//     public:
-//         RemoteCommand(): NotifyCharacteristic(
-//             UUID("9B3C81D8-57B1-4A8A-B8DF-0E56F7CA51C2"),
-//             // len = 13 bytes
-//             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-//             // WRITE_NO_ERSPONSE | NOTIFY
-//             BLE::Properties::Write) {}
+class AMSService: public BLE::GATTService {
+public:
+    class RemoteCommand: public BLE::GATTCharacteristic {
+    public:
+        RemoteCommand(): GATTCharacteristic(
+            UUID("9B3C81D8-57B1-4A8A-B8DF-0E56F7CA51C2")) {}
+    };
 
-//     };
+    AMSService()
+        : GATTService(UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC")) {
+            remoteCommand = std::make_shared<RemoteCommand>();
 
-//     AMSService()
-//         : Service(UUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC")) {
-//             remoteCommand = std::make_shared<RemoteCommand>();
+            addCharacteristic(remoteCommand);
+        }
 
-//             addCharacteristic(remoteCommand);
-//         }
-
-//     std::shared_ptr<RemoteCommand> remoteCommand;
-// };
+    std::shared_ptr<RemoteCommand> remoteCommand;
+};
 
 class LEDBlinkerService: public BLE::Service {
 public:
@@ -130,7 +125,7 @@ std::shared_ptr<BatteryManager> batteryManager(std::make_shared<BatteryManager>(
 std::unique_ptr<BLE::Manager> bluetooth;
 std::shared_ptr<CANService> canService;
 std::shared_ptr<LEDBlinkerService> ledBlinkerService;
-// std::shared_ptr<AMSService> amsService;
+std::shared_ptr<AMSService> amsService;
 
 void setup() {
     Serial.begin();
@@ -157,10 +152,8 @@ void setup() {
     canService = std::make_shared<CANService>();
     bluetooth->addService(canService);
 
-    // Serial.println("About to add AMSService");
-    // amsService = std::make_shared<AMSService>();
-    // bluetooth->addService(amsService);
-    // Serial.println("Added AMSService");
+    amsService = std::make_shared<AMSService>();
+    bluetooth->addGATTClientService(amsService);
 
     Serial.println("About to begin advertising");
     bluetooth->startAdvertising();

@@ -196,11 +196,58 @@ namespace BLE {
         const UUID& getType() const { return type; }
         const std::vector<std::shared_ptr<Characteristic>>& getCharacteristics() const { return characteristics; }
 
-    private:
+    protected:
         UUID type;
         std::vector<std::shared_ptr<Characteristic>> characteristics;
         //TODO: do we need secondary services?
         //std::vector<Service> includedServices;
+    };
+
+    class GATTCharacteristic {
+        friend class Manager;
+    public:
+        GATTCharacteristic(UUID type): type(type) {}
+
+        const UUID& getType() const { return type; }
+
+        bool isDiscovered() const { return discovered; }
+        void discover(gatt_client_characteristic_t characteristic) {
+            this->characteristic = characteristic;
+            this->discovered = true;
+        }
+
+        // TODO: implement all of these (just write for now)
+        // read, write, writeNoResponse, onIndicate, onNotify, onReadCompleted, onWriteCompleted, etc.
+        int tryWrite(std::vector<uint8_t> data);
+
+    protected:
+        UUID type;
+        bool discovered = false;
+        gatt_client_characteristic_t characteristic;
+    };
+
+    class GATTService {
+        friend class Manager;
+    public:
+        GATTService(UUID type): type(type) {}
+
+        void addCharacteristic(std::shared_ptr<GATTCharacteristic> characteristic) {
+            characteristics.push_back(characteristic);
+        }
+
+        void discover(gatt_client_service_t service) {
+            this->service = service;
+            this->discovered = true;
+        }
+
+        bool isDiscovered() const { return discovered; }
+        const UUID& getType() const { return type; }
+        const std::vector<std::shared_ptr<GATTCharacteristic>>& getCharacteristics() const { return characteristics; }
+    private:
+        UUID type;
+        std::vector<std::shared_ptr<GATTCharacteristic>> characteristics;
+        bool discovered = false;
+        gatt_client_service_t service;
     };
 
     class Manager {
@@ -209,6 +256,7 @@ namespace BLE {
         ~Manager();
 
         void addService(std::shared_ptr<Service> service);
+        void addGATTClientService(std::shared_ptr<GATTService> service);
 
         void setAdvertisingParameters(advParams_t* advertisingParameters);
         //TODO: make wrapper around advertisement data
@@ -235,10 +283,10 @@ namespace BLE {
         void onCharacteristicDiscoveredCallback(BLEStatus_t status, uint16_t handle, gatt_client_characteristic_t *characteristic);
 
         std::vector<std::shared_ptr<Service>> services;
-        // FIXME: apply UUID filter to this
-        std::vector<gatt_client_service_t> discoveredServices;
         std::map<uint16_t, std::shared_ptr<Characteristic>> characteristicHandles;
         std::map<uint16_t, std::shared_ptr<Descriptor>> descriptorHandles;
+
+        std::vector<std::shared_ptr<GATTService>> gattClientServices;
 
         bool connected;
     };
