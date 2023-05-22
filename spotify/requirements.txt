@@ -1,4 +1,4 @@
 Flask==1.0
-requests==2.20.0
+requests==2.31.0
 cryptography~=2.3
 cffi==1.11
